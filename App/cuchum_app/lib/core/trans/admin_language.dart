@@ -1,0 +1,228 @@
+import 'language_provider.dart';
+
+class AdminLanguage {
+  static const Map<String, Map<String, String>> _translations = {
+    'vi': {
+      // Nav
+      'members': 'Thành viên',
+      'member_management': 'Quản lý Thành viên',
+
+      // Tabs
+      'tab_members': 'Danh sách',
+      'tab_requests': 'Yêu cầu hồ sơ',
+
+      // Filter
+      'filter_all': 'Tất cả',
+      'filter_active': 'Hoạt động',
+      'filter_inactive': 'Đã khóa',
+      'search_hint': 'Tìm theo tên, số điện thoại...',
+
+      // Member card
+      'member_since': 'Tham gia',
+      'no_members': 'Không có thành viên nào',
+
+      // Actions
+      'add_member': 'Thêm thành viên',
+      'lock_account': 'Khóa tài khoản',
+      'unlock_account': 'Mở khóa',
+      'reset_password': 'Đặt lại mật khẩu',
+      'confirm_lock': 'Bạn có chắc muốn khóa tài khoản này?',
+      'confirm_unlock': 'Bạn có chắc muốn mở khóa tài khoản này?',
+      'confirm_reset_pw': 'Nhập mật khẩu mới cho tài khoản này:',
+      'new_password': 'Mật khẩu mới',
+      'status_updated': 'Đã cập nhật trạng thái',
+      'password_reset': 'Đã đặt lại mật khẩu',
+      'member_created': 'Đã tạo thành viên mới',
+
+      // Create member form
+      'create_member': 'Tạo thành viên',
+      'full_name': 'Họ và tên',
+      'phone_number': 'Số điện thoại',
+      'email_optional': 'Email (tùy chọn)',
+      'password': 'Mật khẩu',
+      'field_required': 'Vui lòng nhập trường này',
+      'phone_hint': 'Nhập số điện thoại',
+      'name_hint': 'Nhập họ và tên',
+      'email_hint': 'Nhập email',
+      'password_hint': 'Tối thiểu 6 ký tự',
+      'password_too_short': 'Mật khẩu phải có ít nhất 6 ký tự',
+
+      // Profile requests
+      'no_requests': 'Không có yêu cầu nào',
+      'pending': 'Chờ duyệt',
+      'approved': 'Đã duyệt',
+      'rejected': 'Đã từ chối',
+      'filter_pending': 'Chờ duyệt',
+      'filter_approved': 'Đã duyệt',
+      'filter_rejected': 'Đã từ chối',
+      'approve': 'Duyệt',
+      'reject': 'Từ chối',
+      'reject_reason': 'Lý do từ chối',
+      'reject_reason_hint': 'Nhập lý do...',
+      'request_approved': 'Yêu cầu đã được duyệt',
+      'request_rejected': 'Yêu cầu đã bị từ chối',
+      'requested_changes': 'Thay đổi yêu cầu',
+      'new_citizen_id': 'CMND/CCCD mới',
+      'new_license_class': 'Hạng bằng mới',
+      'new_license_number': 'Số bằng mới',
+      'new_address': 'Địa chỉ mới',
+      'submitted_at': 'Gửi lúc',
+
+      // Address picker
+      'address_street': 'Số nhà, Tên đường',
+      'address_street_hint': 'Ví dụ: 41 Đường Nguyễn Huệ',
+      'address_province': 'Tỉnh/Thành phố',
+      'address_province_hint': 'Chọn tỉnh/thành phố',
+      'address_commune': 'Xã/Phường',
+      'address_commune_hint': 'Chọn xã/phường',
+      'address_search': 'Tìm kiếm...',
+      'address_no_results': 'Không tìm thấy kết quả',
+      'address_loading': 'Đang tải...',
+      'address_select_province_first': 'Vui lòng chọn tỉnh/thành phố trước',
+
+      // Citizen ID
+      'citizen_id_invalid': 'CMND/CCCD phải có đúng 12 chữ số',
+
+      // Vehicles (admin)
+      'vehicles_menu': 'Quản lý phương tiện',
+      'vehicle_management': 'Quản lý xe',
+      'vehicle_add': 'Thêm xe',
+      'vehicle_edit': 'Sửa xe',
+      'vehicle_plate': 'Biển số xe',
+      'vehicle_type': 'Loại xe',
+      'vehicle_type_hint': 'VD: Xe 16 chỗ',
+      'license_number_field': 'Số bằng lái (GPLX)',
+      'license_number_hint': 'Số in trên bằng (tùy chọn)',
+      'vehicle_status': 'Trạng thái',
+      'vehicle_insurance_expiry': 'Hạn bảo hiểm',
+      'vehicle_registration_expiry': 'Hạn đăng kiểm',
+      'vehicle_last_maintenance': 'Bảo dưỡng gần nhất',
+      'vehicle_next_maintenance': 'Bảo dưỡng tiếp theo',
+      'vehicle_photo': 'Ảnh xe',
+      'vehicle_pick_photo': 'Chọn / đổi ảnh',
+      'vehicle_image_pending': 'Ảnh mới — nhấn Lưu để tải lên',
+      'vehicle_save': 'Lưu',
+      'vehicle_created': 'Đã tạo xe',
+      'vehicle_updated': 'Đã cập nhật xe',
+      'vehicle_deleted': 'Đã xóa xe',
+      'vehicle_delete': 'Xóa xe',
+      'vehicle_delete_confirm': 'Xóa xe này? Không thể hoàn tác.',
+      'vehicle_none': 'Chưa có phương tiện',
+      'vehicle_uploading': 'Đang tải ảnh lên...',
+      'select_date': 'Chọn ngày',
+      'clear_date': 'Bỏ ngày',
+      'status_active': 'Hoạt động',
+      'status_inactive': 'Ngưng sử dụng',
+    },
+    'en': {
+      'members': 'Members',
+      'member_management': 'Member Management',
+
+      'tab_members': 'Members',
+      'tab_requests': 'Profile Requests',
+
+      'filter_all': 'All',
+      'filter_active': 'Active',
+      'filter_inactive': 'Inactive',
+      'search_hint': 'Search by name or phone...',
+
+      'member_since': 'Member since',
+      'no_members': 'No members found',
+
+      'add_member': 'Add Member',
+      'lock_account': 'Lock account',
+      'unlock_account': 'Unlock',
+      'reset_password': 'Reset password',
+      'confirm_lock': 'Are you sure you want to lock this account?',
+      'confirm_unlock': 'Are you sure you want to unlock this account?',
+      'confirm_reset_pw': 'Enter new password for this account:',
+      'new_password': 'New password',
+      'status_updated': 'Status updated',
+      'password_reset': 'Password has been reset',
+      'member_created': 'Member created successfully',
+
+      'create_member': 'Create Member',
+      'full_name': 'Full Name',
+      'phone_number': 'Phone Number',
+      'email_optional': 'Email (optional)',
+      'password': 'Password',
+      'field_required': 'This field is required',
+      'phone_hint': 'Enter phone number',
+      'name_hint': 'Enter full name',
+      'email_hint': 'Enter email',
+      'password_hint': 'At least 6 characters',
+      'password_too_short': 'Password must be at least 6 characters',
+
+      'no_requests': 'No requests found',
+      'pending': 'Pending',
+      'approved': 'Approved',
+      'rejected': 'Rejected',
+      'filter_pending': 'Pending',
+      'filter_approved': 'Approved',
+      'filter_rejected': 'Rejected',
+      'approve': 'Approve',
+      'reject': 'Reject',
+      'reject_reason': 'Rejection reason',
+      'reject_reason_hint': 'Enter reason...',
+      'request_approved': 'Request approved',
+      'request_rejected': 'Request rejected',
+      'requested_changes': 'Requested changes',
+      'new_citizen_id': 'New ID number',
+      'new_license_class': 'New license class',
+      'new_license_number': 'New license number',
+      'new_address': 'New address',
+      'submitted_at': 'Submitted',
+
+      // Address picker
+      'address_street': 'House No., Street',
+      'address_street_hint': 'e.g. 41 Nguyen Hue Street',
+      'address_province': 'Province/City',
+      'address_province_hint': 'Select province/city',
+      'address_commune': 'Commune/Ward',
+      'address_commune_hint': 'Select commune/ward',
+      'address_search': 'Search...',
+      'address_no_results': 'No results found',
+      'address_loading': 'Loading...',
+      'address_select_province_first': 'Please select a province first',
+
+      // Citizen ID
+      'citizen_id_invalid': 'ID must be exactly 12 digits',
+
+      // Vehicles (admin)
+      'vehicles_menu': 'Fleet / Vehicles',
+      'vehicle_management': 'Vehicle management',
+      'vehicle_add': 'Add vehicle',
+      'vehicle_edit': 'Edit vehicle',
+      'vehicle_plate': 'License plate',
+      'vehicle_type': 'Vehicle type',
+      'vehicle_type_hint': 'e.g. 16-seat van',
+      'license_number_field': 'License number',
+      'license_number_hint': 'Printed on card (optional)',
+      'vehicle_status': 'Status',
+      'vehicle_insurance_expiry': 'Insurance expiry',
+      'vehicle_registration_expiry': 'Registration / inspection expiry',
+      'vehicle_last_maintenance': 'Last maintenance',
+      'vehicle_next_maintenance': 'Next maintenance',
+      'vehicle_photo': 'Vehicle photo',
+      'vehicle_pick_photo': 'Pick / change photo',
+      'vehicle_image_pending': 'New photo — tap Save to upload',
+      'vehicle_save': 'Save',
+      'vehicle_created': 'Vehicle created',
+      'vehicle_updated': 'Vehicle updated',
+      'vehicle_deleted': 'Vehicle deleted',
+      'vehicle_delete': 'Delete vehicle',
+      'vehicle_delete_confirm': 'Delete this vehicle? This cannot be undone.',
+      'vehicle_none': 'No vehicles yet',
+      'vehicle_uploading': 'Uploading photo...',
+      'select_date': 'Pick date',
+      'clear_date': 'Clear date',
+      'status_active': 'Active',
+      'status_inactive': 'Inactive',
+    },
+  };
+
+  static String get(String key, AppLanguage language) {
+    final langCode = language == AppLanguage.vi ? 'vi' : 'en';
+    return _translations[langCode]?[key] ?? key;
+  }
+}

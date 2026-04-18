@@ -1,0 +1,1199 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DMS - Báo Cáo Hệ Thống CucHum</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      .chart-container {
+        position: relative;
+        width: 100%;
+        max-width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+        height: 40vh;
+        max-height: 350px;
+        min-height: 250px;
+      }
+      body {
+        background-color: #f8fafc;
+        color: #334155;
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          BlinkMacSystemFont,
+          "Segoe UI",
+          Roboto,
+          "Helvetica Neue",
+          Arial,
+          sans-serif;
+        overflow-x: hidden;
+      }
+      .api-method {
+        font-weight: 700;
+        padding: 0.125rem 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.75rem;
+        display: inline-block;
+        min-width: 60px;
+        text-align: center;
+      }
+      .method-get {
+        background-color: #dbeafe;
+        color: #1e40af;
+      }
+      .method-post {
+        background-color: #dcfce7;
+        color: #166534;
+      }
+      .method-patch {
+        background-color: #fef08a;
+        color: #854d0e;
+      }
+      .method-put {
+        background-color: #ffedd5;
+        color: #9a3412;
+      }
+      .method-delete {
+        background-color: #fee2e2;
+        color: #991b1b;
+      }
+
+      .nav-item.active {
+        background-color: #334155;
+        color: #f8fafc;
+        border-left: 4px solid #0ea5e9;
+      }
+      .accordion-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out;
+      }
+      .accordion-content.expanded {
+        max-height: 2000px;
+        transition: max-height 0.5s ease-in;
+      }
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #f1f5f9;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
+    </style>
+  </head>
+  <body class="h-screen flex overflow-hidden">
+    <!-- Chosen Palette: Warm Neutrals (Slate-50 to Slate-800) with Sky Blue (#0ea5e9) and Emerald Green (#10b981) accents for a professional, calm, and trustworthy administrative interface. -->
+    <!-- Application Structure Plan: A Dashboard-style Single Page Application (SPA) with a sidebar navigation. Chosen to allow stakeholders (Admin/Management) to quickly switch between high-level operational metrics (Dashboard), system documentation (System Overview), and technical integration details (API Reference) without losing context. This non-linear exploration suits complex system specifications better than a static linear document. -->
+    <!-- Visualization & Content Choices: 1. Key Metrics (HTML Cards) -> Inform -> Show top-level stats like active drivers/vehicles -> Justification: Quick snapshot of system scale. 2. Fuel Trend (Chart.js Line Chart) -> Change/Trend -> Show daily fuel costs -> Justification: Directly addresses the "Minh bạch chi phí" (Cost Transparency) goal. 3. Trip Stats (Chart.js Bar Chart) -> Compare -> Compare trips across days -> Justification: Addresses "Tối ưu hiệu suất" (Performance Optimization) goal. 4. API Reference (HTML Accordion + JS) -> Organize -> Group APIs by module -> Justification: Makes lengthy technical documentation scannable and easy to explore. Library: Chart.js (NO SVG/Mermaid used). -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <aside
+      class="w-64 bg-slate-900 text-slate-300 flex flex-col transition-all duration-300 flex-shrink-0 z-20 shadow-xl"
+    >
+      <div
+        class="h-16 flex items-center px-6 bg-slate-950 text-white font-bold text-xl tracking-wider"
+      >
+        <span class="mr-2">🚛</span> DMS CucHum
+      </div>
+      <nav class="flex-1 overflow-y-auto py-4">
+        <ul class="space-y-1">
+          <li>
+            <button
+              data-target="view-dashboard"
+              class="nav-btn w-full text-left px-6 py-3 hover:bg-slate-800 hover:text-white transition-colors active flex items-center"
+            >
+              <span class="mr-3 text-lg">📊</span> Tổng quan Vận hành
+            </button>
+          </li>
+          <li>
+            <button
+              data-target="view-system"
+              class="nav-btn w-full text-left px-6 py-3 hover:bg-slate-800 hover:text-white transition-colors flex items-center"
+            >
+              <span class="mr-3 text-lg">📄</span> Đặc tả Hệ thống
+            </button>
+          </li>
+          <li>
+            <button
+              data-target="view-api"
+              class="nav-btn w-full text-left px-6 py-3 hover:bg-slate-800 hover:text-white transition-colors flex items-center"
+            >
+              <span class="mr-3 text-lg">🔌</span> Tài liệu API
+            </button>
+          </li>
+        </ul>
+      </nav>
+      <div class="p-4 bg-slate-950 text-xs text-slate-500 text-center">
+        Phiên bản 2.3.4 &copy; 2026
+      </div>
+    </aside>
+
+    <main class="flex-1 overflow-y-auto bg-slate-50 relative">
+      <header
+        class="h-16 bg-white border-b border-slate-200 flex items-center px-8 sticky top-0 z-10 shadow-sm"
+      >
+        <h1 id="page-title" class="text-xl font-bold text-slate-800">
+          Tổng quan Vận hành
+        </h1>
+      </header>
+
+      <div class="p-8">
+        <section id="view-dashboard" class="view-section block">
+          <div class="mb-8">
+            <p class="text-slate-600 leading-relaxed text-lg">
+              Màn hình này mô phỏng các chỉ số vận hành cốt lõi của hệ thống
+              <strong>CucHum DMS</strong>. Mục đích chính là cung cấp cái nhìn
+              trực quan về quy mô đội xe, tối ưu hóa hiệu suất chuyến đi và đảm
+              bảo sự minh bạch tuyệt đối trong chi phí nhiên liệu dựa trên dữ
+              liệu báo cáo thời gian thực từ ứng dụng di động của tài xế.
+            </p>
+          </div>
+
+          <div
+            class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+          >
+            <div
+              class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 transition-transform hover:-translate-y-1"
+            >
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium text-slate-500 mb-1">
+                    Tài xế hoạt động
+                  </p>
+                  <p class="text-3xl font-bold text-slate-800">42</p>
+                </div>
+                <div
+                  class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-2xl"
+                >
+                  👨‍✈️
+                </div>
+              </div>
+              <div
+                class="mt-4 text-sm text-emerald-600 flex items-center font-medium"
+              >
+                <span class="mr-1">↑</span> 2 tài xế mới tháng này
+              </div>
+            </div>
+
+            <div
+              class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 transition-transform hover:-translate-y-1"
+            >
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium text-slate-500 mb-1">
+                    Phương tiện
+                  </p>
+                  <p class="text-3xl font-bold text-slate-800">38</p>
+                </div>
+                <div
+                  class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 text-2xl"
+                >
+                  🚛
+                </div>
+              </div>
+              <div class="mt-4 text-sm text-slate-500 flex items-center">
+                100% đang trong tình trạng tốt
+              </div>
+            </div>
+
+            <div
+              class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 transition-transform hover:-translate-y-1"
+            >
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium text-slate-500 mb-1">
+                    Tổng chuyến đi (Tháng)
+                  </p>
+                  <p class="text-3xl font-bold text-slate-800">1,284</p>
+                </div>
+                <div
+                  class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 text-2xl"
+                >
+                  🗺️
+                </div>
+              </div>
+              <div
+                class="mt-4 text-sm text-emerald-600 flex items-center font-medium"
+              >
+                <span class="mr-1">↑</span> 12% so với tháng trước
+              </div>
+            </div>
+
+            <div
+              class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 transition-transform hover:-translate-y-1"
+            >
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-sm font-medium text-slate-500 mb-1">
+                    Chi phí nhiên liệu (VNĐ)
+                  </p>
+                  <p class="text-3xl font-bold text-slate-800">458M</p>
+                </div>
+                <div
+                  class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center text-amber-600 text-2xl"
+                >
+                  ⛽
+                </div>
+              </div>
+              <div
+                class="mt-4 text-sm text-red-500 flex items-center font-medium"
+              >
+                <span class="mr-1">!</span> Cần rà soát 2 hóa đơn
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div
+              class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col"
+            >
+              <h3 class="text-lg font-bold text-slate-800 mb-2">
+                Biến động Chi phí Nhiên liệu
+              </h3>
+              <p class="text-sm text-slate-500 mb-6">
+                Theo dõi sự thay đổi tổng chi phí đổ xăng/dầu theo ngày trong 7
+                ngày qua. Tương tác với điểm dữ liệu để xem chi tiết.
+              </p>
+              <div class="chart-container flex-1">
+                <canvas id="fuelChart"></canvas>
+              </div>
+            </div>
+
+            <div
+              class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col"
+            >
+              <h3 class="text-lg font-bold text-slate-800 mb-2">
+                Năng suất Chuyến đi
+              </h3>
+              <p class="text-sm text-slate-500 mb-6">
+                Thống kê số lượng chuyến chạy thành công hàng ngày của toàn bộ
+                đội xe nhằm đánh giá hiệu năng vận hành.
+              </p>
+              <div class="chart-container flex-1">
+                <canvas id="tripChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="view-system" class="view-section hidden">
+          <div class="max-w-4xl mx-auto">
+            <div class="mb-8">
+              <p class="text-slate-600 leading-relaxed text-lg">
+                Phần này trình bày tóm tắt nội dung đặc tả kiến trúc và mục tiêu
+                nghiệp vụ của dự án
+                <strong
+                  >Crew App (Hệ thống Quản lý Vận hành & Nhân sự Đội xe)</strong
+                >. Nó giải thích lý do tại sao hệ thống được xây dựng và các
+                module chức năng chính đóng vai trò gì trong việc số hóa quy
+                trình công ty.
+              </p>
+            </div>
+
+            <div
+              class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-8"
+            >
+              <div class="bg-slate-800 text-white p-6">
+                <h2 class="text-2xl font-bold flex items-center">
+                  <span class="mr-3">🎯</span> Tổng quan Hệ thống
+                </h2>
+              </div>
+              <div class="p-6">
+                <p class="text-slate-700 mb-4 leading-relaxed">
+                  Crew App (DMS) là giải pháp chuyển đổi số nội bộ được thiết kế
+                  chuyên biệt để quản lý tài xế và vận hành đội xe (đặc biệt tối
+                  ưu cho mô hình điều hành các tuyến xe buýt trung chuyển sân
+                  bay).
+                </p>
+                <p class="text-slate-700 mb-6 leading-relaxed">
+                  Hệ thống giải quyết triệt để bài toán quản lý thủ công hiện
+                  tại, loại bỏ tình trạng báo cáo chi phí rời rạc qua các ứng
+                  dụng tin nhắn (Zalo/Telegram) và số hóa hoàn toàn các thủ tục
+                  giấy tờ hành chính.
+                </p>
+
+                <h3
+                  class="text-lg font-bold text-slate-800 mb-3 border-b pb-2 border-slate-100"
+                >
+                  Mục tiêu cốt lõi
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div
+                    class="bg-slate-50 p-4 rounded-lg border border-slate-100"
+                  >
+                    <div
+                      class="font-bold text-slate-800 mb-1 flex items-center"
+                    >
+                      <span class="mr-2">🗄️</span> Tập trung hóa dữ liệu
+                    </div>
+                    <p class="text-sm text-slate-600">
+                      Thu thập và quản lý hồ sơ nhân sự, hợp đồng, bảng lương
+                      đến chi phí vận hành trên một nền tảng.
+                    </p>
+                  </div>
+                  <div
+                    class="bg-slate-50 p-4 rounded-lg border border-slate-100"
+                  >
+                    <div
+                      class="font-bold text-slate-800 mb-1 flex items-center"
+                    >
+                      <span class="mr-2">🔍</span> Minh bạch chi phí
+                    </div>
+                    <p class="text-sm text-slate-600">
+                      Kiểm soát chi phí nhiên liệu thông qua quy trình báo cáo
+                      tối thiểu gồm tổng tiền và hình ảnh hóa đơn; dữ liệu ODO
+                      là tùy chọn.
+                    </p>
+                  </div>
+                  <div
+                    class="bg-slate-50 p-4 rounded-lg border border-slate-100"
+                  >
+                    <div
+                      class="font-bold text-slate-800 mb-1 flex items-center"
+                    >
+                      <span class="mr-2">📈</span> Tối ưu hiệu suất
+                    </div>
+                    <p class="text-sm text-slate-600">
+                      Theo dõi chính xác năng suất làm việc, số chuyến chạy,
+                      quản lý kiểm tra an toàn xe đầu ngày.
+                    </p>
+                  </div>
+                  <div
+                    class="bg-slate-50 p-4 rounded-lg border border-slate-100"
+                  >
+                    <div
+                      class="font-bold text-slate-800 mb-1 flex items-center"
+                    >
+                      <span class="mr-2">🍃</span> Paperless
+                    </div>
+                    <p class="text-sm text-slate-600">
+                      Số hóa 100% hợp đồng lao động và quy trình giao nhận,
+                      khiếu nại bảng lương hàng tháng.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+              <div
+                class="bg-white rounded-xl shadow-sm border border-slate-200 p-6"
+              >
+                <h3
+                  class="text-xl font-bold text-slate-800 mb-4 flex items-center text-indigo-600"
+                >
+                  <span class="mr-2">📱</span> Dành cho Tài xế (App)
+                </h3>
+                <ul class="space-y-3 text-slate-700">
+                  <li class="flex items-start">
+                    <span class="text-emerald-500 mr-2">✓</span>
+                    <span
+                      ><strong>Quản lý Hồ sơ:</strong> Xem và tự cập nhật thông
+                      tin cá nhân.</span
+                    >
+                  </li>
+                  <li class="flex items-start">
+                    <span class="text-emerald-500 mr-2">✓</span>
+                    <span
+                      ><strong>Tra cứu Hành chính:</strong> Truy cập hợp đồng
+                      (PDF), xác nhận E-Payslip.</span
+                    >
+                  </li>
+                  <li class="flex items-start">
+                    <span class="text-emerald-500 mr-2">✓</span>
+                    <span
+                      ><strong>Báo cáo Nhiên liệu:</strong> Cập nhật xăng dầu
+                      tối thiểu với tổng tiền và ảnh hóa đơn (ODO/lít là tùy
+                      chọn).</span
+                    >
+                  </li>
+                  <li class="flex items-start">
+                    <span class="text-emerald-500 mr-2">✓</span>
+                    <span
+                      ><strong>Checklist & Sự cố:</strong> Đánh giá an toàn xe
+                      đầu ngày, báo cáo va chạm tức thời.</span
+                    >
+                  </li>
+                </ul>
+              </div>
+              <div
+                class="bg-white rounded-xl shadow-sm border border-slate-200 p-6"
+              >
+                <h3
+                  class="text-xl font-bold text-slate-800 mb-4 flex items-center text-blue-600"
+                >
+                  <span class="mr-2">💻</span> Dành cho Điều hành (Admin)
+                </h3>
+                <ul class="space-y-3 text-slate-700">
+                  <li class="flex items-start">
+                    <span class="text-emerald-500 mr-2">✓</span>
+                    <span
+                      ><strong>Quản lý Tài khoản:</strong> Cấp phát và thu hồi
+                      tức thời quyền truy cập của tài xế.</span
+                    >
+                  </li>
+                  <li class="flex items-start">
+                    <span class="text-emerald-500 mr-2">✓</span>
+                    <span
+                      ><strong>Phân phối Lương:</strong> Import Excel để đẩy
+                      bảng lương tự động cho hàng loạt tài xế.</span
+                    >
+                  </li>
+                  <li class="flex items-start">
+                    <span class="text-emerald-500 mr-2">✓</span>
+                    <span
+                      ><strong>Giám sát Đối soát:</strong> Xem minh chứng đổ
+                      xăng thời gian thực, thêm ghi chú duyệt.</span
+                    >
+                  </li>
+                  <li class="flex items-start">
+                    <span class="text-emerald-500 mr-2">✓</span>
+                    <span
+                      ><strong>Truyền thông Nội bộ:</strong> Gửi Broadcast
+                      Notifications đẩy thẳng tới app tài xế.</span
+                    >
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="view-api" class="view-section hidden">
+          <div class="max-w-5xl mx-auto">
+            <div class="mb-8">
+              <p class="text-slate-600 leading-relaxed text-lg">
+                Khám phá cấu trúc kỹ thuật của hệ thống thông qua Danh sách API
+                Endpoints chuẩn RESTful. Tương tác bằng cách nhấp vào từng nhóm
+                chức năng (module) bên dưới để xem các lệnh gọi API cụ thể,
+                phương thức HTTP, quyền truy cập và dữ liệu truyền tải. Giao
+                diện này thay thế cho tài liệu Markdown tuyến tính, giúp nhà
+                phát triển dễ dàng tra cứu.
+              </p>
+            </div>
+
+            <div
+              class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-6"
+            >
+              <div
+                class="bg-slate-50 border-b border-slate-200 px-6 py-4 flex justify-between items-center"
+              >
+                <div>
+                  <h3 class="font-bold text-slate-800">
+                    Thông tin Kết nối Mặc định
+                  </h3>
+                  <p class="text-sm text-slate-500">
+                    Base URL:
+                    <code
+                      class="bg-slate-200 px-2 py-0.5 rounded text-rose-600 font-mono"
+                      >http://localhost:8080/api/v1</code
+                    >
+                  </p>
+                </div>
+                <div class="text-sm">
+                  <span
+                    class="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full font-medium text-xs"
+                    >JWT Bearer Token Required</span
+                  >
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-4" id="api-accordion-container"></div>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      const apiData = [
+        {
+          title: "1. Xác thực (Authentication)",
+          icon: "🔒",
+          endpoints: [
+            {
+              method: "POST",
+              path: "/auth/login",
+              role: "PUBLIC",
+              desc: "Đăng nhập bằng phone hoặc email.",
+            },
+            {
+              method: "POST",
+              path: "/auth/refresh",
+              role: "PUBLIC",
+              desc: "Làm mới access token bằng refresh token.",
+            },
+            {
+              method: "POST",
+              path: "/auth/logout",
+              role: "ALL",
+              desc: "Đăng xuất và thu hồi refresh token.",
+            },
+            {
+              method: "POST",
+              path: "/auth/forgot-password",
+              role: "PUBLIC",
+              desc: "Gửi OTP đặt lại mật khẩu qua email.",
+            },
+            {
+              method: "POST",
+              path: "/auth/reset-password",
+              role: "PUBLIC",
+              desc: "Đặt lại mật khẩu bằng OTP.",
+            },
+            {
+              method: "POST",
+              path: "/auth/change-password",
+              role: "ALL",
+              desc: "Đổi mật khẩu khi đã đăng nhập.",
+            },
+            {
+              method: "POST",
+              path: "/auth/biometric-login",
+              role: "PUBLIC",
+              desc: "Đăng nhập bằng biometric_token đã lưu trên thiết bị.",
+            },
+            {
+              method: "POST",
+              path: "/auth/biometric/enable",
+              role: "ALL",
+              desc: "Kích hoạt sinh trắc học và cấp biometric_token mới.",
+            },
+            {
+              method: "DELETE",
+              path: "/auth/biometric/disable",
+              role: "ALL",
+              desc: "Tắt sinh trắc học và xóa biometric_token.",
+            },
+          ],
+        },
+        {
+          title: "2. Quản lý Tài khoản & Hồ sơ (Users & Profile)",
+          icon: "👤",
+          endpoints: [
+            {
+              method: "GET",
+              path: "/users/me",
+              role: "ALL",
+              desc: "Lấy thông tin tài khoản hiện tại.",
+            },
+            {
+              method: "GET",
+              path: "/users",
+              role: "ADMIN",
+              desc: "Lấy danh sách tài xế có phân trang/lọc trạng thái.",
+            },
+            {
+              method: "POST",
+              path: "/users",
+              role: "ADMIN",
+              desc: "Tạo tài khoản tài xế mới.",
+            },
+            {
+              method: "PATCH",
+              path: "/users/:id/status",
+              role: "ADMIN",
+              desc: "Khóa/Mở khóa tài khoản tài xế.",
+            },
+            {
+              method: "PATCH",
+              path: "/users/:id/password",
+              role: "ADMIN",
+              desc: "Admin đổi mật khẩu cho user.",
+            },
+            {
+              method: "GET",
+              path: "/profile",
+              role: "ALL",
+              desc: "Xem hồ sơ cá nhân và pending_request (nếu có).",
+            },
+            {
+              method: "PUT",
+              path: "/profile",
+              role: "ALL",
+              desc: "Cập nhật hồ sơ cá nhân (DRIVER vào hàng chờ duyệt).",
+            },
+            {
+              method: "GET",
+              path: "/users/:id/profile",
+              role: "ADMIN",
+              desc: "Xem chi tiết hồ sơ của một tài xế cụ thể.",
+            },
+          ],
+        },
+        {
+          title: "2b. Duyệt Yêu cầu Cập nhật Hồ sơ (Profile Requests)",
+          icon: "📋",
+          endpoints: [
+            {
+              method: "GET",
+              path: "/profile-requests",
+              role: "ADMIN",
+              desc: "Lấy danh sách yêu cầu cập nhật hồ sơ (lọc theo status).",
+            },
+            {
+              method: "PATCH",
+              path: "/profile-requests/:id/review",
+              role: "ADMIN",
+              desc: "Duyệt hoặc từ chối yêu cầu cập nhật hồ sơ.",
+            },
+          ],
+        },
+        {
+          title: "3. Hợp đồng & Pháp lý (Contracts)",
+          icon: "📄",
+          endpoints: [
+            {
+              method: "GET",
+              path: "/contracts",
+              role: "DRIVER | ADMIN",
+              desc: "Danh sách hợp đồng theo vai trò và bộ lọc phản hồi.",
+            },
+            {
+              method: "POST",
+              path: "/contracts",
+              role: "ADMIN",
+              desc: "Tạo/Upload hợp đồng mới cho tài xế.",
+            },
+            {
+              method: "PATCH",
+              path: "/contracts/:id/view",
+              role: "DRIVER",
+              desc: "Đánh dấu tài xế đã mở xem hợp đồng PDF.",
+            },
+            {
+              method: "PATCH",
+              path: "/contracts/:id/respond",
+              role: "DRIVER",
+              desc: "Tài xế ACKNOWLEDGED hoặc DECLINED hợp đồng.",
+            },
+          ],
+        },
+        {
+          title: "4. Quản lý Lương (Payslips)",
+          icon: "💰",
+          endpoints: [
+            {
+              method: "GET",
+              path: "/payslips",
+              role: "ALL",
+              desc: "Danh sách bảng lương (lọc tháng tùy chọn).",
+            },
+            {
+              method: "POST",
+              path: "/payslips",
+              role: "ADMIN",
+              desc: "Tạo bảng lương đơn lẻ cho một tài xế.",
+            },
+            {
+              method: "POST",
+              path: "/payslips/import",
+              role: "ADMIN",
+              desc: "Import file Excel để phân phối bảng lương hàng loạt.",
+            },
+            {
+              method: "PATCH",
+              path: "/payslips/:id/view",
+              role: "DRIVER",
+              desc: "Đánh dấu tài xế đã xem bảng lương.",
+            },
+            {
+              method: "PATCH",
+              path: "/payslips/:id/confirm",
+              role: "DRIVER",
+              desc: "Xác nhận hoặc khiếu nại bảng lương.",
+            },
+          ],
+        },
+        {
+          title: "5. Phương tiện & Checklist (Vehicles & Checklists)",
+          icon: "🚛",
+          endpoints: [
+            {
+              method: "GET",
+              path: "/vehicles",
+              role: "ALL",
+              desc: "Danh sách phương tiện của công ty.",
+            },
+            {
+              method: "GET",
+              path: "/vehicles/:id/maintenance",
+              role: "ALL",
+              desc: "Xem thông tin hạn bảo hiểm/đăng kiểm của xe.",
+            },
+            {
+              method: "POST",
+              path: "/vehicles",
+              role: "ADMIN",
+              desc: "Tạo phương tiện mới.",
+            },
+            {
+              method: "PATCH",
+              path: "/vehicles/:id",
+              role: "ADMIN",
+              desc: "Cập nhật thông tin phương tiện.",
+            },
+            {
+              method: "DELETE",
+              path: "/vehicles/:id",
+              role: "ADMIN",
+              desc: "Xóa xe khi không còn chuyến đang/đến hạn.",
+            },
+            {
+              method: "GET",
+              path: "/checklists",
+              role: "ADMIN",
+              desc: "Xem lịch sử checklist theo xe/ngày/chuyến.",
+            },
+            {
+              method: "POST",
+              path: "/checklists",
+              role: "DRIVER",
+              desc: "Nộp checklist an toàn xe trước/trong chuyến.",
+            },
+          ],
+        },
+        {
+          title: "6. Quản lý Xăng Dầu (Fuel Reports)",
+          icon: "⛽",
+          endpoints: [
+            {
+              method: "GET",
+              path: "/fuel-reports",
+              role: "ALL",
+              desc: "Xem lịch sử đổ xăng (lọc date/vehicle/driver/trip).",
+            },
+            {
+              method: "GET",
+              path: "/fuel-reports/export",
+              role: "ADMIN",
+              desc: "Xuất báo cáo xăng dầu ra Excel.",
+            },
+            {
+              method: "POST",
+              path: "/fuel-reports",
+              role: "DRIVER",
+              desc: "Khai báo đổ xăng, tối thiểu tổng tiền và ảnh hóa đơn.",
+            },
+            {
+              method: "PATCH",
+              path: "/fuel-reports/:id",
+              role: "ADMIN",
+              desc: "Thêm ghi chú kiểm duyệt hóa đơn xăng.",
+            },
+          ],
+        },
+        {
+          title: "7. Quản lý Chuyến đi (Trips Tracking)",
+          icon: "🗺️",
+          endpoints: [
+            {
+              method: "GET",
+              path: "/trips",
+              role: "ALL",
+              desc: "Lấy danh sách chuyến đi theo role và bộ lọc.",
+            },
+            {
+              method: "GET",
+              path: "/trips/:id",
+              role: "DRIVER | ADMIN",
+              desc: "Chi tiết chuyến đi, gồm biển số/tài xế/tọa độ map.",
+            },
+            {
+              method: "POST",
+              path: "/trips/schedule",
+              role: "ADMIN",
+              desc: "Lên lịch chuyến trước cho tài xế.",
+            },
+            {
+              method: "PATCH",
+              path: "/trips/:id/respond",
+              role: "DRIVER",
+              desc: "Tài xế chấp nhận hoặc từ chối chuyến đã được lên lịch.",
+            },
+            {
+              method: "POST",
+              path: "/trips/:id/start",
+              role: "DRIVER",
+              desc: "Bắt đầu chuyến đã accept (có kiểm tra checklist + cửa sổ giờ).",
+            },
+            {
+              method: "POST",
+              path: "/trips/start",
+              role: "DRIVER",
+              desc: "Mở chuyến ad-hoc (không lịch, app tài xế không dùng).",
+            },
+            {
+              method: "PATCH",
+              path: "/trips/:id/end",
+              role: "DRIVER",
+              desc: "Kết thúc chuyến đi.",
+            },
+            {
+              method: "PATCH",
+              path: "/trips/:id/cancel",
+              role: "ADMIN",
+              desc: "Admin hủy chuyến pending/accepted kèm lý do.",
+            },
+          ],
+        },
+        {
+          title: "8. Báo cáo Sự cố & Vi phạm (Incidents)",
+          icon: "🚨",
+          endpoints: [
+            {
+              method: "GET",
+              path: "/incidents",
+              role: "ALL",
+              desc: "Lấy danh sách sự cố (lọc type/trip_id).",
+            },
+            {
+              method: "POST",
+              path: "/incidents",
+              role: "DRIVER",
+              desc: "Tài xế báo cáo sự cố/vi phạm tại hiện trường.",
+            },
+          ],
+        },
+        {
+          title: "9. Thông báo (Notifications)",
+          icon: "📢",
+          endpoints: [
+            {
+              method: "GET",
+              path: "/notifications",
+              role: "DRIVER",
+              desc: "Danh sách thông báo của tài xế.",
+            },
+            {
+              method: "GET",
+              path: "/notifications/unread-count",
+              role: "ALL",
+              desc: "Lấy số lượng thông báo chưa đọc.",
+            },
+            {
+              method: "PATCH",
+              path: "/notifications/:id/read",
+              role: "ALL",
+              desc: "Đánh dấu một thông báo là đã đọc.",
+            },
+            {
+              method: "POST",
+              path: "/notifications",
+              role: "ADMIN",
+              desc: "Admin gửi thông báo broadcast hoặc theo driver_id.",
+            },
+            {
+              method: "GET",
+              path: "/admin/notifications",
+              role: "ADMIN",
+              desc: "Danh sách thông báo hệ thống dành cho admin.",
+            },
+            {
+              method: "PATCH",
+              path: "/admin/notifications/:id/read",
+              role: "ADMIN",
+              desc: "Đánh dấu admin notification đã đọc.",
+            },
+            {
+              method: "GET",
+              path: "/notifications/stream",
+              role: "ALL",
+              desc: "Kênh SSE nhận thông báo real-time.",
+            },
+          ],
+        },
+        {
+          title: "10. Hệ thống Upload Files (Upload)",
+          icon: "📤",
+          endpoints: [
+            {
+              method: "POST",
+              path: "/upload",
+              role: "ALL",
+              desc: "Upload file lên server (multipart/form-data).",
+            },
+            {
+              method: "GET",
+              path: "/Media/:subfolder/:filename",
+              role: "PUBLIC",
+              desc: "Truy cập file public đã upload.",
+            },
+          ],
+        },
+        {
+          title: "11. Tiện ích Hệ thống (System)",
+          icon: "❤️",
+          endpoints: [
+            {
+              method: "GET",
+              path: "/health",
+              role: "PUBLIC",
+              desc: "Kiểm tra trạng thái hoạt động của server.",
+            },
+          ],
+        },
+        {
+          title: "12. Giá Xăng Dầu (Fuel Prices)",
+          icon: "💹",
+          endpoints: [
+            {
+              method: "GET",
+              path: "/prices",
+              role: "PUBLIC",
+              desc: "Lấy giá xăng dầu từ Petrolimex và PVOil.",
+            },
+            {
+              method: "GET",
+              path: "/prices/petrolimex",
+              role: "PUBLIC",
+              desc: "Lấy giá xăng dầu từ Petrolimex.",
+            },
+            {
+              method: "GET",
+              path: "/prices/pvoil",
+              role: "PUBLIC",
+              desc: "Lấy giá xăng dầu từ PVOil.",
+            },
+          ],
+        },
+      ];
+
+      function initNavigation() {
+        const navBtns = document.querySelectorAll(".nav-btn");
+        const sections = document.querySelectorAll(".view-section");
+        const pageTitle = document.getElementById("page-title");
+
+        navBtns.forEach((btn) => {
+          btn.addEventListener("click", (e) => {
+            navBtns.forEach((b) => b.classList.remove("active"));
+
+            e.currentTarget.classList.add("active");
+
+            sections.forEach((sec) => sec.classList.add("hidden"));
+
+            const targetId = e.currentTarget.getAttribute("data-target");
+            document.getElementById(targetId).classList.remove("hidden");
+
+            pageTitle.textContent = e.currentTarget.textContent
+              .replace(
+                /[^\w\sàáãạảăắằẳẵặâấầẩẫậèéẹẻẽêềếểễệđìíĩỉịòóõọỏôốồổỗộơớờởỡợùúũụủưứừửữựỳýỵỷỹ]/gi,
+                "",
+              )
+              .trim();
+          });
+        });
+      }
+
+      function renderAPI() {
+        const container = document.getElementById("api-accordion-container");
+
+        apiData.forEach((section, index) => {
+          const item = document.createElement("div");
+          item.className =
+            "bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden";
+
+          let endpointsHTML = "";
+          section.endpoints.forEach((ep) => {
+            const methodClass = `method-${ep.method.toLowerCase()}`;
+            endpointsHTML += `
+                        <div class="border-t border-slate-100 p-4 hover:bg-slate-50 transition-colors flex flex-col md:flex-row md:items-center gap-4">
+                            <div class="w-24 flex-shrink-0">
+                                <span class="api-method ${methodClass}">${ep.method}</span>
+                            </div>
+                            <div class="flex-1 font-mono text-sm font-semibold text-slate-700">
+                                ${ep.path}
+                            </div>
+                            <div class="w-24 flex-shrink-0 text-xs font-bold text-slate-500">
+                                🔑 ${ep.role}
+                            </div>
+                            <div class="flex-1 text-sm text-slate-600">
+                                ${ep.desc}
+                            </div>
+                        </div>
+                    `;
+          });
+
+          item.innerHTML = `
+                    <button class="w-full px-6 py-4 flex items-center justify-between bg-white hover:bg-slate-50 transition-colors focus:outline-none" onclick="toggleAccordion(${index})">
+                        <h3 class="text-lg font-bold text-slate-800 flex items-center">
+                            <span class="mr-3 text-xl">${section.icon}</span> ${section.title}
+                        </h3>
+                        <span id="icon-${index}" class="text-slate-400 transform transition-transform duration-300">▼</span>
+                    </button>
+                    <div id="content-${index}" class="accordion-content">
+                        <div class="bg-white">
+                            ${endpointsHTML}
+                        </div>
+                    </div>
+                `;
+          container.appendChild(item);
+        });
+      }
+
+      window.toggleAccordion = function (index) {
+        const content = document.getElementById(`content-${index}`);
+        const icon = document.getElementById(`icon-${index}`);
+
+        if (content.classList.contains("expanded")) {
+          content.classList.remove("expanded");
+          icon.style.transform = "rotate(0deg)";
+        } else {
+          content.classList.add("expanded");
+          icon.style.transform = "rotate(180deg)";
+        }
+      };
+
+      function initCharts() {
+        Chart.defaults.font.family =
+          'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+        Chart.defaults.color = "#64748b";
+
+        const commonOptions = {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "top",
+              labels: { usePointStyle: true, boxWidth: 8 },
+            },
+            tooltip: {
+              backgroundColor: "rgba(15, 23, 42, 0.9)",
+              titleFont: { size: 13 },
+              bodyFont: { size: 13 },
+              padding: 10,
+              cornerRadius: 8,
+              displayColors: true,
+              callbacks: {
+                label: function (context) {
+                  let label = context.dataset.label || "";
+                  if (label) {
+                    label += ": ";
+                  }
+                  if (context.parsed.y !== null) {
+                    if (context.dataset.label.includes("VNĐ")) {
+                      label +=
+                        new Intl.NumberFormat("vi-VN").format(
+                          context.parsed.y,
+                        ) + " đ";
+                    } else {
+                      label += context.parsed.y;
+                    }
+                  }
+                  return label;
+                },
+              },
+            },
+          },
+          interaction: {
+            mode: "index",
+            intersect: false,
+          },
+        };
+
+        const fuelCtx = document.getElementById("fuelChart").getContext("2d");
+        new Chart(fuelCtx, {
+          type: "line",
+          data: {
+            labels: [
+              "01/04",
+              "02/04",
+              "03/04",
+              "04/04",
+              "05/04",
+              "06/04",
+              "07/04",
+            ],
+            datasets: [
+              {
+                label: "Chi phí nhiên liệu (VNĐ)",
+                data: [
+                  12000000, 15500000, 11000000, 18200000, 14000000, 16500000,
+                  13800000,
+                ],
+                borderColor: "#0ea5e9",
+                backgroundColor: "rgba(14, 165, 233, 0.1)",
+                borderWidth: 2,
+                pointBackgroundColor: "#fff",
+                pointBorderColor: "#0ea5e9",
+                pointBorderWidth: 2,
+                pointRadius: 4,
+                fill: true,
+                tension: 0.4,
+              },
+            ],
+          },
+          options: {
+            ...commonOptions,
+            scales: {
+              y: {
+                beginAtZero: true,
+                grid: { color: "#f1f5f9", drawBorder: false },
+                ticks: {
+                  callback: function (value) {
+                    return value / 1000000 + "M";
+                  },
+                },
+              },
+              x: { grid: { display: false, drawBorder: false } },
+            },
+          },
+        });
+
+        const tripCtx = document.getElementById("tripChart").getContext("2d");
+        new Chart(tripCtx, {
+          type: "bar",
+          data: {
+            labels: [
+              "01/04",
+              "02/04",
+              "03/04",
+              "04/04",
+              "05/04",
+              "06/04",
+              "07/04",
+            ],
+            datasets: [
+              {
+                label: "Số chuyến hoàn thành",
+                data: [145, 162, 130, 185, 156, 170, 148],
+                backgroundColor: "#10b981",
+                borderRadius: 4,
+                barThickness: "flex",
+                maxBarThickness: 40,
+              },
+            ],
+          },
+          options: {
+            ...commonOptions,
+            scales: {
+              y: {
+                beginAtZero: true,
+                grid: { color: "#f1f5f9", drawBorder: false },
+              },
+              x: { grid: { display: false, drawBorder: false } },
+            },
+          },
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        initNavigation();
+        renderAPI();
+        setTimeout(() => toggleAccordion(0), 100);
+        initCharts();
+      });
+    </script>
+  </body>
+</html>

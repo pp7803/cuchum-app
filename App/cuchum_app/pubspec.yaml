@@ -1,0 +1,47 @@
+name: cuchum_app
+description: "CucHum - Fleet Management & HR System"
+publish_to: "none"
+
+version: 1.0.0+2
+
+environment:
+  sdk: ^3.11.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  shared_preferences: ^2.2.2
+  provider: ^6.1.1
+  firebase_core: ^3.13.0
+  firebase_messaging: ^15.2.4
+  flutter_local_notifications: ^18.0.1
+  local_auth: ^2.3.0
+  image_picker: ^1.1.2
+  http: ^1.2.2
+  file_picker: ^8.1.2
+  pdfx: ^2.9.2
+  flutter_map: ^7.0.2
+  latlong2: ^0.9.1
+  geolocator: ^14.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.3
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  macos:
+    generate: true
+  image_path: lib/assets/images/icon.png
+  remove_alpha_ios: true
+
+flutter:
+  uses-material-design: true
+  assets:
+    - lib/assets/images/

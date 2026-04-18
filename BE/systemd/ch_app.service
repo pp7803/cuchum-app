@@ -1,0 +1,22 @@
+[Unit]
+Description=CUCHUM Backend API Service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=www
+Group=www
+WorkingDirectory=/www/wwwroot/CUCHUM_BE
+ExecStart=/www/wwwroot/CUCHUM_BE/bin/ch-app
+Restart=always
+RestartSec=5
+Environment=GIN_MODE=release
+Environment=TZ=Asia/Ho_Chi_Minh
+LimitNOFILE=65535
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=ch_app
+
+[Install]
+WantedBy=multi-user.target

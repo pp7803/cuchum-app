@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "868284115963",
+    "project_id": "cuchum-a01e7",
+    "storage_bucket": "cuchum-a01e7.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:868284115963:android:9dd49ab85e15017db8b95e",
+        "android_client_info": {
+          "package_name": "com.cuchum.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBbDmBiaeoMvWre81XbYGg0sbDh6tdImWw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
