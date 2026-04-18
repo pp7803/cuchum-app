@@ -28,15 +28,15 @@ BE/
 
 ## Công nghệ sử dụng
 
-| Nhóm | Công nghệ | Mục đích |
-| ---- | --------- | -------- |
-| Mobile App | Flutter, Dart, Provider | Xây dựng ứng dụng đa nền tảng cho tài xế và điều hành |
-| Backend API | Golang, Gin, PostgreSQL | Xử lý nghiệp vụ, phân quyền và lưu trữ dữ liệu vận hành |
-| Xác thực & Bảo mật | JWT (access/refresh/biometric token), Role middleware | Bảo mật API và kiểm soát truy cập theo vai trò |
-| Thông báo | Firebase Cloud Messaging (FCM), APNs (qua FCM trên iOS/macOS), flutter_local_notifications | Gửi push notification đa nền tảng và hiển thị thông báo cục bộ |
-| Realtime | Server-Sent Events (SSE) | Cập nhật thông báo theo thời gian thực qua `/notifications/stream` |
-| Hạ tầng | Nginx, systemd | Reverse proxy và quản lý tiến trình backend |
-| File storage | Media static files + upload multipart/form-data | Lưu trữ avatar, hợp đồng, bảng lương, hóa đơn, ảnh sự cố |
+| Nhóm               | Công nghệ                                                                                  | Mục đích                                                           |
+| ------------------ | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------ |
+| Mobile App         | Flutter, Dart, Provider                                                                    | Xây dựng ứng dụng đa nền tảng cho tài xế và điều hành              |
+| Backend API        | Golang, Gin, PostgreSQL                                                                    | Xử lý nghiệp vụ, phân quyền và lưu trữ dữ liệu vận hành            |
+| Xác thực & Bảo mật | JWT (access/refresh/biometric token), Role middleware                                      | Bảo mật API và kiểm soát truy cập theo vai trò                     |
+| Thông báo          | Firebase Cloud Messaging (FCM), APNs (qua FCM trên iOS/macOS), flutter_local_notifications | Gửi push notification đa nền tảng và hiển thị thông báo cục bộ     |
+| Realtime           | Server-Sent Events (SSE)                                                                   | Cập nhật thông báo theo thời gian thực qua `/notifications/stream` |
+| Hạ tầng            | Nginx, systemd                                                                             | Reverse proxy và quản lý tiến trình backend                        |
+| File storage       | Media static files + upload multipart/form-data                                            | Lưu trữ avatar, hợp đồng, bảng lương, hóa đơn, ảnh sự cố           |
 
 ## Lịch nền (cron trong `cmd/api`)
 
