@@ -253,6 +253,19 @@ class _PayslipsScreenState extends State<PayslipsScreen> {
         child: Scaffold(
           backgroundColor: bg,
           bottomNavigationBar: _bottomBar(isDark),
+          floatingActionButton: _selectedDriver != null
+              ? FloatingActionButton.extended(
+                  onPressed: () => _showCreateSheet(lang, isDark,
+                      preselectedDriver: _selectedDriver),
+                  backgroundColor: AppColors.primary,
+                  icon: const Icon(Icons.add_rounded, color: Colors.white),
+                  label: Text(
+                    PayslipsLanguage.get('create', lang),
+                    style: const TextStyle(
+                        color: Colors.white, fontWeight: FontWeight.w600),
+                  ),
+                )
+              : null,
           body: SafeArea(
             child: _selectedDriver == null
                 ? _buildAdminDriverList(lang, isDark, fg)
@@ -541,29 +554,6 @@ class _PayslipsScreenState extends State<PayslipsScreen> {
           ),
         ),
         Expanded(child: _buildDriverPayslipBody(lang, isDark, fg)),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-          child: SizedBox(
-            width: double.infinity,
-            child: FilledButton.icon(
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12)),
-              ),
-              onPressed: () => _showCreateSheet(lang, isDark,
-                  preselectedDriver: _selectedDriver),
-              icon: const Icon(Icons.add_rounded, color: Colors.white),
-              label: Text(
-                PayslipsLanguage.get('create', lang),
-                style: const TextStyle(
-                    color: Colors.white, fontWeight: FontWeight.w600),
-              ),
-            ),
-          ),
-        ),
       ],
     );
   }
