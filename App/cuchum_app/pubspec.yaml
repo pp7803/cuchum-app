@@ -2,7 +2,7 @@ name: cuchum_app
 description: "CucHum - Fleet Management & HR System"
 publish_to: "none"
 
-version: 1.0.0+2
+version: 1.0.1+2
 
 environment:
   sdk: ^3.11.0
