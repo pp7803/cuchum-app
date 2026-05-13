@@ -1,6 +1,7 @@
 import '../constants/api_constants.dart';
 import 'api_models.dart';
 import 'api_service.dart';
+import 'fcm_service.dart';
 
 class AuthService {
   final ApiService _apiService;
@@ -35,14 +36,29 @@ class AuthService {
 
   Future<ApiResponse<void>> logout() async {
     final refreshToken = _apiService.refreshToken;
+    final fcmToken = FCMService().fcmToken;
+
     if (refreshToken != null) {
+      final body = <String, dynamic>{
+        'refresh_token': refreshToken,
+      };
+      if (fcmToken != null && fcmToken.isNotEmpty) {
+        body['fcm_token'] = fcmToken;
+      }
+
       await _apiService.post(
         ApiConstants.logout,
-        {'refresh_token': refreshToken},
+        body,
         requireAuth: true,
       );
     }
+
     await _apiService.clearSession();
+    try {
+      await FCMService().deleteToken();
+    } catch (_) {
+      // APNs token may not be available yet on macOS — non-fatal
+    }
     return ApiResponse(success: true, message: 'Đăng xuất thành công');
   }
 

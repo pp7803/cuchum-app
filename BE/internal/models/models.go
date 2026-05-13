@@ -288,6 +288,8 @@ type Notification struct {
 	IsRead              bool       `json:"is_read"`
 	IsAdminNotification bool       `json:"is_admin_notification"` // TRUE = targeted at admins
 	CreatedBy           *uuid.UUID `json:"created_by,omitempty"`
+	ResourceType        *string    `json:"resource_type,omitempty"` // e.g., "trip", "payslip", "contract"
+	ResourceID          *uuid.UUID `json:"resource_id,omitempty"`   // related resource UUID
 	CreatedAt           time.Time  `json:"created_at"`
 }
 

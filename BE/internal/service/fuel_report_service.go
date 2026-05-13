@@ -145,7 +145,7 @@ func (s *FuelReportService) Create(ctx context.Context, driverID uuid.UUID, req 
 			}
 			go func() {
 				s.notif.NotifyAdmins(context.Background(), "⛽ Báo cáo xăng",
-					fmt.Sprintf("%s báo chi phí nhiên liệu %.0fđ (xe %s).", dn, req.TotalCost, plate))
+					fmt.Sprintf("%s báo chi phí nhiên liệu %.0fđ (xe %s).", dn, req.TotalCost, plate), "trip", req.TripID)
 			}()
 		}
 	}

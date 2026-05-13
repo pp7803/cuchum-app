@@ -190,13 +190,13 @@ func (s *TripService) RespondTrip(ctx context.Context, tripID, driverID uuid.UUI
 		switch req.Status {
 		case models.TripDriverAccepted:
 			s.notif.NotifyAdmins(bg, "✅ Tài xế nhận chuyến",
-				fmt.Sprintf("%s đã đồng ý chuyến (xe %s).", dn, plate))
+				fmt.Sprintf("%s đã đồng ý chuyến (xe %s).", dn, plate), "trip", &trip.ID)
 		case models.TripDriverDeclined:
 			msg := fmt.Sprintf("%s đã từ chối chuyến (xe %s).", dn, plate)
 			if req.DeclineNote != nil && *req.DeclineNote != "" {
 				msg += " Lý do: " + *req.DeclineNote
 			}
-			s.notif.NotifyAdmins(bg, "⛔ Tài xế từ chối chuyến", msg)
+			s.notif.NotifyAdmins(bg, "⛔ Tài xế từ chối chuyến", msg, "trip", &trip.ID)
 		}
 	}()
 	return trip, nil
@@ -246,7 +246,7 @@ func (s *TripService) StartScheduledTrip(ctx context.Context, tripID, driverID u
 	dn, plate := s.driverAndPlate(ctx, trip)
 	go func() {
 		s.notif.NotifyAdmins(context.Background(), "▶️ Bắt đầu chuyến",
-			fmt.Sprintf("%s đã bắt đầu chạy (xe %s).", dn, plate))
+			fmt.Sprintf("%s đã bắt đầu chạy (xe %s).", dn, plate), "trip", &trip.ID)
 	}()
 	return trip, nil
 }
@@ -276,7 +276,7 @@ func (s *TripService) EndTrip(ctx context.Context, tripID uuid.UUID, driverID uu
 	dn, plate := s.driverAndPlate(ctx, trip)
 	go func() {
 		s.notif.NotifyAdmins(context.Background(), "🏁 Kết thúc chuyến",
-			fmt.Sprintf("%s đã kết thúc chuyến (xe %s).", dn, plate))
+			fmt.Sprintf("%s đã kết thúc chuyến (xe %s).", dn, plate), "trip", &trip.ID)
 	}()
 	return trip, nil
 }
@@ -328,7 +328,7 @@ func (s *TripService) AdminCancelTrip(ctx context.Context, tripID uuid.UUID, rea
 	}
 	go func() {
 		s.notif.NotifyDriver(context.Background(), driverID, "❌ Chuyến bị hủy",
-			fmt.Sprintf("Quản trị đã hủy chuyến. Lý do: %s", reason))
+			fmt.Sprintf("Quản trị đã hủy chuyến. Lý do: %s", reason), "trip", &trip.ID)
 	}()
 	return trip, nil
 }

@@ -3,7 +3,7 @@
 **Dự án:** CucHum App (CH App) - Hệ thống Quản lý Vận hành & Nhân sự Đội xe  
 **Base URL:** `http://localhost:8080/api/v1`  
 **Xác thực:** JWT Bearer Token  
-**Phiên bản:** 2.3.4
+**Phiên bản:** 2.3.5
 
 ---
 
@@ -1027,6 +1027,9 @@ Hệ thống có hai loại thông báo:
 | **Driver notification** | `false`                 | Tài xế (personal + broadcast)                 |
 | **Admin notification**  | `true`                  | Admin (system alerts: profile requests, v.v.) |
 
+> **Điều hướng thông báo (`[NEW 2.3.5]`):** Mỗi notification có thể chứa `resource_type` và `resource_id` để app biết cần mở màn hình nào khi người dùng bấm vào (từ trong app hoặc Notification Center).  
+> FCM payload, REST response và SSE event đều bao gồm hai trường này (có thể null với thông báo broadcast không gắn tài nguyên cụ thể).
+
 ---
 
 #### GET /api/v1/notifications
@@ -1048,11 +1051,17 @@ Lấy danh sách thông báo của tài xế (`is_admin_notification = false`).
       "driver_id": "uuid-or-null",
       "is_read": false,
       "is_admin_notification": false,
+      "resource_type": "trip",
+      "resource_id": "uuid",
       "created_at": "2026-04-07T20:00:00Z"
     }
   ]
 }
 ```
+
+> **`resource_type`** (tùy chọn): `"trip"` | `"payslip"` | `"contract"` | `"incident"` — dùng để điều hướng khi bấm vào thông báo.  
+> **`resource_id`** (tùy chọn): UUID của tài nguyên liên quan, giúp app mở đúng màn hình chi tiết.  
+> Thông báo không có hai trường này sẽ chỉ đánh dấu đã đọc, không điều hướng.
 
 ---
 
@@ -1145,8 +1154,10 @@ Cache-Control: no-cache
 **Event format:**
 
 ```
-data: {"id":"uuid","title":"Tiêu đề","body":"Nội dung","is_admin_notification":false,"is_read":false,"created_at":"2026-04-07T20:00:00Z"}\n\n
+data: {"id":"uuid","title":"Tiêu đề","body":"Nội dung","is_admin_notification":false,"is_read":false,"resource_type":"trip","resource_id":"uuid","created_at":"2026-04-07T20:00:00Z"}\n\n
 ```
+
+> `resource_type` và `resource_id` có thể null — app dùng để điều hướng khi bấm vào thông báo.
 
 **Connection acknowledgment:**
 
@@ -1226,7 +1237,7 @@ Kiểm tra trạng thái server hoạt động (Ping/Pong).
 
 #### GET /api/v1/prices
 
-Lấy giá xăng dầu từ cả Petrolimex và PVOil.
+Lấy giá xăng dầu từ Petrolimex.
 
 **Role:** PUBLIC
 
@@ -1261,16 +1272,6 @@ Lấy giá xăng dầu từ cả Petrolimex và PVOil.
           "price_zone2": "21.230"
         }
       ]
-    },
-    "pvoil": {
-      "company": "PVOil",
-      "updated_at": "Giá điều chỉnh từ 15h00 ngày 07/04/2026",
-      "prices": [
-        { "name": "Xăng RON 95-V", "price_zone1": "25.920" },
-        { "name": "Xăng RON 95-III", "price_zone1": "24.890" },
-        { "name": "Xăng E5 RON 92-II", "price_zone1": "24.000" },
-        { "name": "Dầu DO 0.05S", "price_zone1": "20.800" }
-      ]
     }
   }
 }
@@ -1279,12 +1280,6 @@ Lấy giá xăng dầu từ cả Petrolimex và PVOil.
 #### GET /api/v1/prices/petrolimex
 
 Lấy giá xăng dầu từ Petrolimex (Zone 1 + Zone 2).
-
-**Role:** PUBLIC
-
-#### GET /api/v1/prices/pvoil
-
-Lấy giá xăng dầu từ PVOil (Zone 1).
 
 **Role:** PUBLIC
 
@@ -1346,12 +1341,13 @@ upload:
 
 ---
 
-**Version:** 2.3.4
+**Version:** 2.3.5
 
 ### Changelog
 
 | Version | Thay đổi                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2.3.5   | **Notifications:** thêm `resource_type` + `resource_id` vào bảng `notifications`, REST/SSE response và FCM payload. Migration **`020_notification_resources.sql`**. **App:** bấm vào thông báo (in-app hoặc Notification Center) sẽ mở đúng màn hình chi tiết (chuyến / bảng lương / hợp đồng). **Fuel Prices:** bỏ nhà cung cấp PVOil khỏi BE + FE; `GET /prices` chỉ trả Petrolimex; route `/prices/pvoil` bị xóa. **App UI:** sửa FAB đè pagination ở màn Payslips; thêm nút "Tất cả" cho bộ lọc ngày danh sách chuyến admin/driver; làm lại button chi tiết chuyến đồng nhất style. |
 | 2.3.4   | **Trips:** thêm `cancelled_at` để hiển thị thời điểm hủy trong chi tiết chuyến. **Incidents:** hỗ trợ `trip_id` để gắn sự cố theo chuyến và lọc `GET /incidents?trip_id=`. Khi báo sự cố gắn chuyến (`trip_id`) hoặc **`TRAFFIC_TICKET`**: tạo thông báo admin trong DB + gửi FCM đến admin. **App:** hiển thị mục **Vi phạm** trên chi tiết chuyến (Driver/Admin).                                                                                                                                                                   |
 | 2.3.3   | **App Trips:** thêm nút **Báo cáo sự cố** ngay trong màn chi tiết chuyến khi trạng thái **IN_PROGRESS**. **Fuel report:** app không còn thu `fuel_purchased_at`; backend tự gán thời điểm mua = `now` nếu client không gửi.                                                                                                                                                                                                                                                                                                           |
 | 2.3.2   | **App Trips:** màn chi tiết chuyến hiển thị bản đồ (flutter_map) dùng các trường tọa độ `start_lat`, `start_lng`, `end_lat`, `end_lng`. **Tài liệu API:** làm rõ các trường tọa độ này trong **GET `/trips`** và **GET `/trips/:id`**.                                                                                                                                                                                                                                                                                                |

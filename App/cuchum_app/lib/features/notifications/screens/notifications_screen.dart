@@ -7,7 +7,9 @@ import '../../../core/trans/language_provider.dart';
 import '../../../core/trans/notifications_language.dart';
 import '../../../core/services/user_service.dart';
 import '../../../core/services/api_models.dart';
+import '../../../core/services/auth_service.dart';
 import '../../../core/services/sse_service.dart';
+import '../../../core/utils/notification_navigation.dart';
 
 /// Giữ thứ tự; bỏ bản trùng `id` (id đã chuẩn hóa trong [NotificationData.fromJson]).
 List<NotificationData> _uniqueNotificationsById(List<NotificationData> list) {
@@ -97,7 +99,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   NotificationData _copyRead(NotificationData n) => NotificationData(
         id: n.id, title: n.title, body: n.body,
         isRead: true, isAdminNotification: n.isAdminNotification,
-        createdAt: n.createdAt);
+        createdAt: n.createdAt,
+        resourceType: n.resourceType, resourceId: n.resourceId);
+
+  void _onNotifTap(NotificationData n) {
+    final isAdmin = Provider.of<AuthService>(context, listen: false)
+            .currentUser
+            ?.isAdmin ??
+        false;
+    NotificationNavigation.navigate(context, n, isAdmin: isAdmin);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -136,7 +147,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                             separatorBuilder: (_, __) => const SizedBox(height: 8),
                             itemBuilder: (_, i) => _NotifCard(
                               notif: _notifications[i], isDark: isDark, lang: lang,
-                              onTap: () => _markRead(_notifications[i]),
+                              onTap: () {
+                                _markRead(_notifications[i]);
+                                _onNotifTap(_notifications[i]);
+                              },
                             ),
                           ),
                         ),
@@ -210,6 +224,7 @@ class _AdminNotificationsScreenState extends State<AdminNotificationsScreen> {
         _notifications[i] = NotificationData(
           id: n.id, title: n.title, body: n.body,
           isRead: true, isAdminNotification: true, createdAt: n.createdAt,
+          resourceType: n.resourceType, resourceId: n.resourceId,
         );
       }
     });
@@ -225,9 +240,18 @@ class _AdminNotificationsScreenState extends State<AdminNotificationsScreen> {
       _notifications = _notifications
           .map((n) => NotificationData(
                 id: n.id, title: n.title, body: n.body,
-                isRead: true, isAdminNotification: true, createdAt: n.createdAt))
+                isRead: true, isAdminNotification: true, createdAt: n.createdAt,
+                resourceType: n.resourceType, resourceId: n.resourceId))
           .toList();
     });
+  }
+
+  void _onNotifTap(NotificationData n) {
+    final isAdmin = Provider.of<AuthService>(context, listen: false)
+            .currentUser
+            ?.isAdmin ??
+        true;
+    NotificationNavigation.navigate(context, n, isAdmin: isAdmin);
   }
 
   @override
@@ -268,7 +292,10 @@ class _AdminNotificationsScreenState extends State<AdminNotificationsScreen> {
                             itemBuilder: (_, i) => _NotifCard(
                               notif: _notifications[i], isDark: isDark, lang: lang,
                               isAdminStyle: true,
-                              onTap: () => _markRead(_notifications[i]),
+                              onTap: () {
+                                _markRead(_notifications[i]);
+                                _onNotifTap(_notifications[i]);
+                              },
                             ),
                           ),
                         ),

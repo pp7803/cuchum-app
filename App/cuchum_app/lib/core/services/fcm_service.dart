@@ -27,6 +27,9 @@ class FCMService {
   String? _fcmToken;
   String? get fcmToken => _fcmToken;
 
+  /// Callback invoked when user taps a notification from Notification Center.
+  void Function(Map<String, dynamic> data)? onNotificationTapNavigation;
+
   /// Android notification channel
   static const AndroidNotificationChannel _channel = AndroidNotificationChannel(
     'cuchum_notifications',
@@ -226,7 +229,6 @@ class FCMService {
   /// Handle notification tap
   void _onNotificationTap(NotificationResponse response) {
     debugPrint('Notification tapped: ${response.payload}');
-    // Handle navigation based on payload
     if (response.payload != null) {
       try {
         final data = json.decode(response.payload!);
@@ -240,10 +242,13 @@ class FCMService {
   /// Handle navigation from notification
   void _handleNotificationNavigation(Map<String, dynamic> data) {
     final type = data['type'] as String?;
-    final id = data['notification_id'] as String?;
+    final resourceType = data['resource_type'] as String?;
+    final resourceId = data['resource_id'] as String?;
+    debugPrint('Navigation: type=$type, resource=$resourceType/$resourceId');
 
-    debugPrint('Navigation: type=$type, id=$id');
-    // TODO: Implement navigation based on notification type
+    if (onNotificationTapNavigation != null && (resourceType != null || data['notification_id'] != null)) {
+      onNotificationTapNavigation!(data);
+    }
   }
 
   /// Show local notification

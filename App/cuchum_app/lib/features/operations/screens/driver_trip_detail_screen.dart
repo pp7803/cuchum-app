@@ -768,26 +768,26 @@ class _DriverTripDetailScreenState extends State<DriverTripDetailScreen> {
                           ],
                           const SizedBox(height: 24),
                           if (_trip!.status == 'SCHEDULED_PENDING') ...[
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: FilledButton.tonal(
-                                    onPressed: () => _respond(accept: true),
-                                    child: Text(
-                                      OperationsLanguage.get('accept', lang),
-                                    ),
-                                  ),
+                            SizedBox(
+                              width: double.infinity,
+                              child: FilledButton(
+                                style: OperationsStyle.primaryFilled(isDark),
+                                onPressed: () => _respond(accept: true),
+                                child: Text(
+                                  OperationsLanguage.get('accept', lang),
                                 ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: OutlinedButton(
-                                    onPressed: () => _respond(accept: false),
-                                    child: Text(
-                                      OperationsLanguage.get('decline', lang),
-                                    ),
-                                  ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              width: double.infinity,
+                              child: OutlinedButton(
+                                style: OperationsStyle.dangerOutlined(isDark),
+                                onPressed: () => _respond(accept: false),
+                                child: Text(
+                                  OperationsLanguage.get('decline', lang),
                                 ),
-                              ],
+                              ),
                             ),
                             const SizedBox(height: 12),
                           ],
@@ -823,48 +823,52 @@ class _DriverTripDetailScreenState extends State<DriverTripDetailScreen> {
                                   ),
                                 ),
                               ),
-                            FilledButton(
-                              style: OperationsStyle.primaryFilled(isDark),
-                              onPressed: _canTapStartScheduled(_trip!)
-                                  ? _startScheduled
-                                  : null,
-                              child: Text(
-                                OperationsLanguage.get('start_trip', lang),
+                            SizedBox(
+                              width: double.infinity,
+                              child: FilledButton(
+                                style: OperationsStyle.primaryFilled(isDark),
+                                onPressed: _canTapStartScheduled(_trip!)
+                                    ? _startScheduled
+                                    : null,
+                                child: Text(
+                                  OperationsLanguage.get('start_trip', lang),
+                                ),
                               ),
                             ),
                             const SizedBox(height: 12),
                           ],
                           if (_trip!.isOngoing) ...[
-                            FilledButton(
-                              style: FilledButton.styleFrom(
-                                backgroundColor: AppColors.error,
-                                foregroundColor: Colors.white,
-                              ),
-                              onPressed: _endTrip,
-                              child: Text(
-                                OperationsLanguage.get('end_trip', lang),
+                            SizedBox(
+                              width: double.infinity,
+                              child: FilledButton(
+                                style: OperationsStyle.dangerFilled(isDark),
+                                onPressed: _endTrip,
+                                child: Text(
+                                  OperationsLanguage.get('end_trip', lang),
+                                ),
                               ),
                             ),
-                            const SizedBox(height: 10),
-                            OutlinedButton.icon(
-                              onPressed: () async {
-                                await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                        DriverTripIncidentScreen(trip: _trip!),
+                            const SizedBox(height: 12),
+                            SizedBox(
+                              width: double.infinity,
+                              child: OutlinedButton.icon(
+                                onPressed: () async {
+                                  await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          DriverTripIncidentScreen(trip: _trip!),
+                                    ),
+                                  );
+                                  if (mounted) await _load();
+                                },
+                                icon: const Icon(Icons.warning_amber_rounded),
+                                style: OperationsStyle.dangerOutlined(isDark),
+                                label: Text(
+                                  OperationsLanguage.get(
+                                    'trip_action_incident',
+                                    lang,
                                   ),
-                                );
-                                if (mounted) await _load();
-                              },
-                              icon: const Icon(Icons.warning_amber_rounded),
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: AppColors.error,
-                              ),
-                              label: Text(
-                                OperationsLanguage.get(
-                                  'trip_action_incident',
-                                  lang,
                                 ),
                               ),
                             ),
@@ -912,31 +916,35 @@ class _DriverTripDetailScreenState extends State<DriverTripDetailScreen> {
                           ],
                           if (_trip!.isEligibleForChecklist &&
                               !_hasChecklistForTrip) ...[
-                            OutlinedButton.icon(
-                              onPressed: () async {
-                                await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                        DriverTripChecklistScreen(trip: _trip!),
+                            SizedBox(
+                              width: double.infinity,
+                              child: OutlinedButton.icon(
+                                onPressed: () async {
+                                  await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          DriverTripChecklistScreen(trip: _trip!),
+                                    ),
+                                  );
+                                  if (mounted) await _load();
+                                },
+                                icon: const Icon(Icons.fact_check),
+                                style: OperationsStyle.tonalButton(isDark),
+                                label: Text(
+                                  OperationsLanguage.get(
+                                    'trip_action_checklist',
+                                    lang,
                                   ),
-                                );
-                                if (mounted) await _load();
-                              },
-                              icon: const Icon(Icons.fact_check),
-                              label: Text(
-                                OperationsLanguage.get(
-                                  'trip_action_checklist',
-                                  lang,
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 10),
+                            const SizedBox(height: 12),
                           ],
                           if (_trip!.canLinkFuelReport &&
                               !_trip!.canAddTripLinkedFuelReport) ...[
                             Padding(
-                              padding: const EdgeInsets.only(bottom: 10),
+                              padding: const EdgeInsets.only(bottom: 12),
                               child: Text(
                                 OperationsLanguage.get(
                                   'fuel_report_window_hint',
@@ -951,24 +959,28 @@ class _DriverTripDetailScreenState extends State<DriverTripDetailScreen> {
                             ),
                           ],
                           if (_trip!.canAddTripLinkedFuelReport) ...[
-                            OutlinedButton.icon(
-                              onPressed: () async {
-                                await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                        DriverTripFuelScreen(trip: _trip!),
+                            SizedBox(
+                              width: double.infinity,
+                              child: OutlinedButton.icon(
+                                onPressed: () async {
+                                  await Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) =>
+                                          DriverTripFuelScreen(trip: _trip!),
+                                    ),
+                                  );
+                                  if (mounted) await _load();
+                                },
+                                icon: const Icon(
+                                  Icons.local_gas_station_outlined,
+                                ),
+                                style: OperationsStyle.tonalButton(isDark),
+                                label: Text(
+                                  OperationsLanguage.get(
+                                    'trip_action_fuel',
+                                    lang,
                                   ),
-                                );
-                                if (mounted) await _load();
-                              },
-                              icon: const Icon(
-                                Icons.local_gas_station_outlined,
-                              ),
-                              label: Text(
-                                OperationsLanguage.get(
-                                  'trip_action_fuel',
-                                  lang,
                                 ),
                               ),
                             ),

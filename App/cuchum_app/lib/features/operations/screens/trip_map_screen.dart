@@ -56,20 +56,16 @@ class _TripMapScreenState extends State<TripMapScreen> {
   List<_TripPoint> _fixedTripPoints() {
     final points = <_TripPoint>[];
     if (_isValidPoint(widget.trip.startLat, widget.trip.startLng)) {
-      points.add(
-        _TripPoint(
-          point: LatLng(widget.trip.startLat!, widget.trip.startLng!),
-          kind: _TripPointKind.start,
-        ),
-      );
+      points.add(_TripPoint(
+        point: LatLng(widget.trip.startLat!, widget.trip.startLng!),
+        kind: _TripPointKind.start,
+      ));
     }
     if (_isValidPoint(widget.trip.endLat, widget.trip.endLng)) {
-      points.add(
-        _TripPoint(
-          point: LatLng(widget.trip.endLat!, widget.trip.endLng!),
-          kind: _TripPointKind.end,
-        ),
-      );
+      points.add(_TripPoint(
+        point: LatLng(widget.trip.endLat!, widget.trip.endLng!),
+        kind: _TripPointKind.end,
+      ));
     }
     return points;
   }
@@ -84,7 +80,6 @@ class _TripMapScreenState extends State<TripMapScreen> {
   LatLng _cameraCenter(List<LatLng> points) {
     if (points.isEmpty) return const LatLng(16.047079, 108.20623);
     if (points.length == 1) return points.first;
-
     final lat =
         points.map((p) => p.latitude).reduce((a, b) => a + b) / points.length;
     final lng =
@@ -95,24 +90,17 @@ class _TripMapScreenState extends State<TripMapScreen> {
   double _cameraZoom(List<LatLng> points) {
     if (points.isEmpty) return 5.6;
     if (points.length == 1) return 15;
-
-    final minLat = points
-        .map((e) => e.latitude)
-        .reduce((a, b) => a < b ? a : b);
-    final maxLat = points
-        .map((e) => e.latitude)
-        .reduce((a, b) => a > b ? a : b);
-    final minLng = points
-        .map((e) => e.longitude)
-        .reduce((a, b) => a < b ? a : b);
-    final maxLng = points
-        .map((e) => e.longitude)
-        .reduce((a, b) => a > b ? a : b);
-
+    final minLat =
+        points.map((e) => e.latitude).reduce((a, b) => a < b ? a : b);
+    final maxLat =
+        points.map((e) => e.latitude).reduce((a, b) => a > b ? a : b);
+    final minLng =
+        points.map((e) => e.longitude).reduce((a, b) => a < b ? a : b);
+    final maxLng =
+        points.map((e) => e.longitude).reduce((a, b) => a > b ? a : b);
     final delta = (maxLat - minLat) > (maxLng - minLng)
         ? (maxLat - minLat)
         : (maxLng - minLng);
-
     if (delta < 0.01) return 15.5;
     if (delta < 0.03) return 14;
     if (delta < 0.08) return 13;
@@ -123,7 +111,28 @@ class _TripMapScreenState extends State<TripMapScreen> {
 
   void _moveCameraToData() {
     final points = _allPointsForCamera();
-    _mapController.move(_cameraCenter(points), _cameraZoom(points));
+    if (points.isEmpty) return;
+    if (points.length == 1) {
+      _mapController.move(points.first, 15);
+      return;
+    }
+    final minLat =
+        points.map((e) => e.latitude).reduce((a, b) => a < b ? a : b);
+    final maxLat =
+        points.map((e) => e.latitude).reduce((a, b) => a > b ? a : b);
+    final minLng =
+        points.map((e) => e.longitude).reduce((a, b) => a < b ? a : b);
+    final maxLng =
+        points.map((e) => e.longitude).reduce((a, b) => a > b ? a : b);
+    _mapController.fitCamera(
+      CameraFit.bounds(
+        bounds: LatLngBounds(
+          LatLng(minLat, minLng),
+          LatLng(maxLat, maxLng),
+        ),
+        padding: const EdgeInsets.all(80),
+      ),
+    );
   }
 
   Future<void> _toggleTracking({bool forceEnable = false}) async {
@@ -160,31 +169,30 @@ class _TripMapScreenState extends State<TripMapScreen> {
     }
 
     await _trackingSub?.cancel();
-    _trackingSub =
-        Geolocator.getPositionStream(
-          locationSettings: const LocationSettings(
-            accuracy: LocationAccuracy.bestForNavigation,
-            distanceFilter: 8,
-          ),
-        ).listen((position) {
-          if (!mounted) return;
-          final next = LatLng(position.latitude, position.longitude);
-          setState(() {
-            _currentLocation = next;
-            if (_liveTrack.isEmpty ||
-                (_liveTrack.last.latitude != next.latitude ||
-                    _liveTrack.last.longitude != next.longitude)) {
-              _liveTrack.add(next);
-              if (_liveTrack.length > 500) {
-                _liveTrack.removeRange(0, _liveTrack.length - 500);
-              }
-            }
-          });
-          if (!_didAutoCenter) {
-            _didAutoCenter = true;
-            _mapController.move(next, 16);
+    _trackingSub = Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.bestForNavigation,
+        distanceFilter: 8,
+      ),
+    ).listen((position) {
+      if (!mounted) return;
+      final next = LatLng(position.latitude, position.longitude);
+      setState(() {
+        _currentLocation = next;
+        if (_liveTrack.isEmpty ||
+            (_liveTrack.last.latitude != next.latitude ||
+                _liveTrack.last.longitude != next.longitude)) {
+          _liveTrack.add(next);
+          if (_liveTrack.length > 500) {
+            _liveTrack.removeRange(0, _liveTrack.length - 500);
           }
-        });
+        }
+      });
+      if (!_didAutoCenter) {
+        _didAutoCenter = true;
+        _mapController.move(next, 16);
+      }
+    });
 
     setState(() {
       _trackingEnabled = true;
@@ -243,16 +251,13 @@ class _TripMapScreenState extends State<TripMapScreen> {
         ),
       ),
     ];
-
     if (_currentLocation != null) {
-      markers.add(
-        Marker(
-          point: _currentLocation!,
-          width: 38,
-          height: 38,
-          child: const _MapMarker(kind: _TripPointKind.current),
-        ),
-      );
+      markers.add(Marker(
+        point: _currentLocation!,
+        width: 38,
+        height: 38,
+        child: const _MapMarker(kind: _TripPointKind.current),
+      ));
     }
 
     final staticRoute = fixedPoints.map((e) => e.point).toList();

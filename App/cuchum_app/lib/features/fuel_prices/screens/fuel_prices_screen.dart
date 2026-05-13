@@ -14,9 +14,7 @@ class FuelPricesScreen extends StatefulWidget {
   State<FuelPricesScreen> createState() => _FuelPricesScreenState();
 }
 
-class _FuelPricesScreenState extends State<FuelPricesScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabs;
+class _FuelPricesScreenState extends State<FuelPricesScreen> {
   FuelPricesData? _data;
   bool _isLoading = true;
   bool _hasError = false;
@@ -24,14 +22,7 @@ class _FuelPricesScreenState extends State<FuelPricesScreen>
   @override
   void initState() {
     super.initState();
-    _tabs = TabController(length: 2, vsync: this);
     _load();
-  }
-
-  @override
-  void dispose() {
-    _tabs.dispose();
-    super.dispose();
   }
 
   Future<void> _load() async {
@@ -53,9 +44,6 @@ class _FuelPricesScreenState extends State<FuelPricesScreen>
     final lang = Provider.of<LanguageProvider>(context).language;
     final bgColor = isDark ? AppColors.darkBackground : const Color(0xFFF0F4FF);
     final textColor = isDark ? AppColors.darkText : AppColors.lightText;
-    final surfaceColor = isDark ? AppColors.darkSurface : Colors.white;
-    final borderColor = isDark ? AppColors.darkBorder : AppColors.lightBorder;
-
     return Scaffold(
       backgroundColor: bgColor,
       body: SafeArea(
@@ -86,48 +74,6 @@ class _FuelPricesScreenState extends State<FuelPricesScreen>
               ),
             ),
 
-            // ── Company TabBar ──────────────────────────────────────────
-            if (!_isLoading && !_hasError && _data != null) ...[
-              const SizedBox(height: 12),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Container(
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: surfaceColor,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.06),
-                        blurRadius: 8, offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: TabBar(
-                    controller: _tabs,
-                    indicator: BoxDecoration(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    indicatorSize: TabBarIndicatorSize.tab,
-                    labelColor: Colors.white,
-                    unselectedLabelColor: isDark
-                        ? AppColors.darkTextSecondary
-                        : AppColors.lightTextSecondary,
-                    labelStyle: const TextStyle(
-                        fontSize: 13, fontWeight: FontWeight.w600),
-                    unselectedLabelStyle: const TextStyle(fontSize: 13),
-                    dividerColor: Colors.transparent,
-                    padding: const EdgeInsets.all(4),
-                    tabs: [
-                      Tab(text: _data!.petrolimex.company),
-                      Tab(text: _data!.pvoil.company),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-
             // ── Content ─────────────────────────────────────────────────
             Expanded(
               child: _isLoading
@@ -150,7 +96,10 @@ class _FuelPricesScreenState extends State<FuelPricesScreen>
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(Icons.wifi_off_rounded,
-                                  size: 56, color: borderColor),
+                                  size: 56,
+                                  color: isDark
+                                      ? AppColors.darkBorder
+                                      : AppColors.lightBorder),
                               const SizedBox(height: 12),
                               Text(FuelPricesLanguage.get('error', lang),
                                   style: TextStyle(
@@ -166,20 +115,10 @@ class _FuelPricesScreenState extends State<FuelPricesScreen>
                             ],
                           ),
                         )
-                      : TabBarView(
-                          controller: _tabs,
-                          children: [
-                            _CompanyPricesTab(
-                              company: _data!.petrolimex,
-                              isDark: isDark,
-                              lang: lang,
-                            ),
-                            _CompanyPricesTab(
-                              company: _data!.pvoil,
-                              isDark: isDark,
-                              lang: lang,
-                            ),
-                          ],
+                      : _CompanyPricesTab(
+                          company: _data!.petrolimex,
+                          isDark: isDark,
+                          lang: lang,
                         ),
             ),
           ],

@@ -4,10 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
-	"github.com/PuerkitoBio/goquery"
 	"github.com/tsnn/ch-app/internal/config"
 )
 
@@ -26,10 +24,9 @@ type PriceData struct {
 	Error     string      `json:"error,omitempty"`
 }
 
-// CombinedPriceResponse holds the scraped prices from both companies
+// CombinedPriceResponse holds the scraped Petrolimex prices
 type CombinedPriceResponse struct {
 	Petrolimex PriceData `json:"petrolimex"`
-	PVOil      PriceData `json:"pvoil"`
 }
 
 // PetrolimexAPIResponse represents the JSON structure from Petrolimex API
@@ -46,7 +43,6 @@ type PetrolimexAPIResponse struct {
 // FuelPriceService handles fuel price scraping
 type FuelPriceService struct {
 	petrolimexURL string
-	pvoilURL      string
 	client        *http.Client
 }
 
@@ -54,18 +50,16 @@ type FuelPriceService struct {
 func NewFuelPriceService(cfg *config.FuelPricesConfig) *FuelPriceService {
 	return &FuelPriceService{
 		petrolimexURL: cfg.PetrolimexURL,
-		pvoilURL:      cfg.PVOilURL,
 		client: &http.Client{
 			Timeout: 30 * time.Second,
 		},
 	}
 }
 
-// GetCombinedPrices fetches prices from both Petrolimex and PVOil
+// GetCombinedPrices fetches Petrolimex prices
 func (s *FuelPriceService) GetCombinedPrices() *CombinedPriceResponse {
 	return &CombinedPriceResponse{
 		Petrolimex: s.ScrapePetrolimex(),
-		PVOil:      s.ScrapePVOil(),
 	}
 }
 
@@ -126,79 +120,6 @@ func (s *FuelPriceService) ScrapePetrolimex() PriceData {
 
 	if len(data.Prices) == 0 {
 		data.Error = "no prices extracted from API response"
-	}
-
-	return data
-}
-
-// ScrapePVOil fetches the latest retail fuel prices from PVOil.
-func (s *FuelPriceService) ScrapePVOil() PriceData {
-	data := PriceData{
-		Company: "PVOil",
-	}
-
-	req, err := http.NewRequest("GET", s.pvoilURL, nil)
-	if err != nil {
-		data.Error = fmt.Sprintf("failed to create request: %v", err)
-		return data
-	}
-	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
-	req.Header.Set("Accept-Language", "vi-VN,vi;q=0.9,en;q=0.8")
-
-	res, err := s.client.Do(req)
-	if err != nil {
-		data.Error = fmt.Sprintf("failed to fetch: %v", err)
-		return data
-	}
-	defer res.Body.Close()
-
-	if res.StatusCode != 200 {
-		data.Error = fmt.Sprintf("status code: %d", res.StatusCode)
-		return data
-	}
-
-	doc, err := goquery.NewDocumentFromReader(res.Body)
-	if err != nil {
-		data.Error = fmt.Sprintf("failed to parse HTML: %v", err)
-		return data
-	}
-
-	// Extract update timestamp from h4.sub-box-title
-	doc.Find("h4.sub-box-title").Each(func(i int, sel *goquery.Selection) {
-		text := strings.TrimSpace(sel.Text())
-		if strings.Contains(text, "Giá điều chỉnh") || strings.Contains(text, "điều chỉnh") {
-			data.UpdatedAt = text
-		}
-	})
-
-	// Extract fuel prices from a.gasoline-price-item elements
-	doc.Find("a.gasoline-price-item").Each(func(i int, sel *goquery.Selection) {
-		// Fuel name is in h3.title
-		nameEl := sel.Find("h3.title")
-		if nameEl.Length() == 0 {
-			return
-		}
-		name := strings.TrimSpace(nameEl.Text())
-
-		// Price is in span.count
-		priceEl := sel.Find("span.count")
-		if priceEl.Length() == 0 {
-			return
-		}
-		priceText := strings.TrimSpace(priceEl.Text())
-		priceText = strings.ReplaceAll(priceText, "đ", "")
-		priceText = strings.TrimSpace(priceText)
-
-		if name != "" && priceText != "" {
-			data.Prices = append(data.Prices, FuelPrice{
-				Name:       name,
-				PriceZone1: priceText,
-			})
-		}
-	})
-
-	if len(data.Prices) == 0 {
-		data.Error = "no prices extracted from page"
 	}
 
 	return data

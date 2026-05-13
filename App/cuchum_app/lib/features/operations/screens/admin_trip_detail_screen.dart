@@ -403,16 +403,17 @@ class _AdminTripDetailScreenState extends State<AdminTripDetailScreen> {
                           ],
                           if (_canAdminCancel(_trip!.status)) ...[
                             const SizedBox(height: 16),
-                            OutlinedButton.icon(
-                              onPressed: _confirmCancelTrip,
-                              icon: const Icon(Icons.cancel_outlined),
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: AppColors.error,
-                              ),
-                              label: Text(
-                                OperationsLanguage.get(
-                                  'trip_cancel_admin',
-                                  lang,
+                            SizedBox(
+                              width: double.infinity,
+                              child: OutlinedButton.icon(
+                                onPressed: _confirmCancelTrip,
+                                icon: const Icon(Icons.cancel_outlined),
+                                style: OperationsStyle.dangerOutlined(isDark),
+                                label: Text(
+                                  OperationsLanguage.get(
+                                    'trip_cancel_admin',
+                                    lang,
+                                  ),
                                 ),
                               ),
                             ),

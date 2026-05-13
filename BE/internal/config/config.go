@@ -21,7 +21,6 @@ type Config struct {
 // FuelPricesConfig holds fuel prices API settings
 type FuelPricesConfig struct {
 	PetrolimexURL string `mapstructure:"petrolimex_url"`
-	PVOilURL      string `mapstructure:"pvoil_url"`
 }
 
 // DatabaseConfig holds database connection settings

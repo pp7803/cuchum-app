@@ -63,13 +63,20 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 // Logout handles user logout
 // @route POST /api/v1/auth/logout
 func (h *AuthHandler) Logout(c *gin.Context) {
-	var req models.RefreshTokenRequest
+	var req models.LogoutRequest
 	if err := c.ShouldBind(&req); err != nil {
 		utils.ValidationErrorResponse(c, err.Error())
 		return
 	}
 
 	_ = h.authService.Logout(c.Request.Context(), req.RefreshToken)
+
+	// Unregister FCM device token if provided
+	if req.FCMToken != nil && *req.FCMToken != "" {
+		userID, _ := c.Get("user_id")
+		_ = h.notificationService.UnregisterDevice(c.Request.Context(), userID.(uuid.UUID), *req.FCMToken)
+	}
+
 	utils.SuccessResponse(c, http.StatusOK, "Logged out successfully", nil)
 }
 

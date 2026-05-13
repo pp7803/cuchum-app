@@ -91,7 +91,7 @@ func (s *ChecklistService) Create(ctx context.Context, driverID uuid.UUID, req m
 	}
 	go func() {
 		s.notif.NotifyAdmins(context.Background(), "📋 Kiểm tra xe",
-			fmt.Sprintf("%s đã hoàn thành kiểm tra xe trước chuyến (xe %s).", dn, plate))
+			fmt.Sprintf("%s đã hoàn thành kiểm tra xe trước chuyến (xe %s).", dn, plate), "trip", &trip.ID)
 	}()
 
 	return checklist, nil

@@ -770,6 +770,8 @@ class NotificationData {
   final bool isRead;
   final bool isAdminNotification;
   final String? createdAt;
+  final String? resourceType;
+  final String? resourceId;
 
   NotificationData({
     required this.id,
@@ -778,6 +780,8 @@ class NotificationData {
     required this.isRead,
     this.isAdminNotification = false,
     this.createdAt,
+    this.resourceType,
+    this.resourceId,
   });
 
   factory NotificationData.fromJson(Map<String, dynamic> json) {
@@ -788,6 +792,8 @@ class NotificationData {
       isRead: json['is_read'] ?? false,
       isAdminNotification: json['is_admin_notification'] ?? false,
       createdAt: json['created_at'],
+      resourceType: json['resource_type'] as String?,
+      resourceId: json['resource_id']?.toString(),
     );
   }
 }
@@ -979,15 +985,13 @@ class FuelCompanyPrices {
 
 class FuelPricesData {
   final FuelCompanyPrices petrolimex;
-  final FuelCompanyPrices pvoil;
 
-  FuelPricesData({required this.petrolimex, required this.pvoil});
+  FuelPricesData({required this.petrolimex});
 
   factory FuelPricesData.fromJson(Map<String, dynamic> json) => FuelPricesData(
     petrolimex: FuelCompanyPrices.fromJson(
       json['petrolimex'] as Map<String, dynamic>,
     ),
-    pvoil: FuelCompanyPrices.fromJson(json['pvoil'] as Map<String, dynamic>),
   );
 }
 

@@ -44,14 +44,3 @@ func (h *FuelPriceHandler) GetPetrolimexPrices(c *gin.Context) {
 	utils.SuccessResponse(c, http.StatusOK, "Petrolimex prices retrieved successfully", prices)
 }
 
-// GetPVOilPrices returns fuel prices from PVOil only
-// @Summary Get PVOil fuel prices
-// @Description Get fuel prices from PVOil (Zone 1 only)
-// @Tags Fuel Prices
-// @Produce json
-// @Success 200 {object} service.PriceData
-// @Router /api/v1/prices/pvoil [get]
-func (h *FuelPriceHandler) GetPVOilPrices(c *gin.Context) {
-	prices := h.fuelPriceService.ScrapePVOil()
-	utils.SuccessResponse(c, http.StatusOK, "PVOil prices retrieved successfully", prices)
-}

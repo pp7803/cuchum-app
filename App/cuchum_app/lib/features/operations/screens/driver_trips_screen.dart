@@ -25,7 +25,7 @@ class _DriverTripsScreenState extends State<DriverTripsScreen> {
   bool _loading = true;
   List<TripData> _trips = [];
   List<VehicleData> _vehicles = [];
-  bool _todayOnly = true;
+  int? _dateRangeDays = 0; // 0 = hôm nay, null = tất cả
   PaginationState _pagination = const PaginationState(itemsPerPage: 20);
 
   @override
@@ -43,11 +43,18 @@ class _DriverTripsScreenState extends State<DriverTripsScreen> {
     setState(() => _loading = true);
     final svc = Provider.of<UserService>(context, listen: false);
     final now = DateTime.now();
-    final start = _todayOnly ? _fmt(now) : _fmt(now.subtract(const Duration(days: 7)));
-    final end = _fmt(now);
 
     final vRes = await svc.getVehicles(status: 'ACTIVE');
-    final tRes = await svc.getTrips(startDate: start, endDate: end);
+    final ApiResponse<TripListResponse> tRes;
+    if (_dateRangeDays == null) {
+      tRes = await svc.getTrips();
+    } else if (_dateRangeDays == 0) {
+      final today = _fmt(now);
+      tRes = await svc.getTrips(date: today);
+    } else {
+      final start = _fmt(now.subtract(Duration(days: _dateRangeDays!)));
+      tRes = await svc.getTrips(startDate: start, endDate: _fmt(now));
+    }
 
     if (!mounted) return;
     setState(() {
@@ -66,6 +73,46 @@ class _DriverTripsScreenState extends State<DriverTripsScreen> {
       if (v.id == t.vehicleId) return v.licensePlate;
     }
     return t.vehicleId ?? '—';
+  }
+
+  List<Widget> _dateRangeChips(AppLanguage lang, Color fg) {
+    final options = <int?>[0, 7, 30, 90, null]; // 0 = hôm nay, null = tất cả
+    final widgets = <Widget>[];
+    for (var i = 0; i < options.length; i++) {
+      final days = options[i];
+      final active = _dateRangeDays == days;
+      String label;
+      if (days == null) {
+        label = lang == AppLanguage.vi ? 'Tất cả' : 'All';
+      } else if (days == 0) {
+        label = lang == AppLanguage.vi ? 'Hôm nay' : 'Today';
+      } else {
+        label = lang == AppLanguage.vi ? '$days ngày' : '$days days';
+      }
+      if (i > 0) widgets.add(const SizedBox(width: 8));
+      widgets.add(
+        ChoiceChip(
+          label: Text(label),
+          selected: active,
+          selectedColor: AppColors.primary.withValues(alpha: 0.18),
+          checkmarkColor: AppColors.primary,
+          labelStyle: TextStyle(
+            color: active ? AppColors.primary : fg,
+            fontWeight: active ? FontWeight.w600 : FontWeight.w500,
+            fontSize: 13,
+          ),
+          side: BorderSide(
+            color: AppColors.primary.withValues(alpha: 0.35),
+          ),
+          onSelected: (v) {
+            if (!v) return;
+            setState(() => _dateRangeDays = days);
+            _load();
+          },
+        ),
+      );
+    }
+    return widgets;
   }
 
   @override
@@ -105,50 +152,11 @@ class _DriverTripsScreenState extends State<DriverTripsScreen> {
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
-              child: Row(
-                children: [
-                  ChoiceChip(
-                    label: Text(lang == AppLanguage.vi ? 'Hôm nay' : 'Today'),
-                    selected: _todayOnly,
-                    selectedColor: AppColors.primary.withValues(alpha: 0.18),
-                    checkmarkColor: AppColors.primary,
-                    labelStyle: TextStyle(
-                      color: _todayOnly ? AppColors.primary : fg,
-                      fontWeight:
-                          _todayOnly ? FontWeight.w600 : FontWeight.w500,
-                      fontSize: 13,
-                    ),
-                    side: BorderSide(
-                      color: AppColors.primary.withValues(alpha: 0.35),
-                    ),
-                    onSelected: (v) {
-                      if (!v) return;
-                      setState(() => _todayOnly = true);
-                      _load();
-                    },
-                  ),
-                  const SizedBox(width: 8),
-                  ChoiceChip(
-                    label: Text(lang == AppLanguage.vi ? '7 ngày' : '7 days'),
-                    selected: !_todayOnly,
-                    selectedColor: AppColors.primary.withValues(alpha: 0.18),
-                    checkmarkColor: AppColors.primary,
-                    labelStyle: TextStyle(
-                      color: !_todayOnly ? AppColors.primary : fg,
-                      fontWeight:
-                          !_todayOnly ? FontWeight.w600 : FontWeight.w500,
-                      fontSize: 13,
-                    ),
-                    side: BorderSide(
-                      color: AppColors.primary.withValues(alpha: 0.35),
-                    ),
-                    onSelected: (v) {
-                      if (!v) return;
-                      setState(() => _todayOnly = false);
-                      _load();
-                    },
-                  ),
-                ],
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: _dateRangeChips(lang, fg),
+                ),
               ),
             ),
             Padding(

@@ -48,8 +48,19 @@ func (s *NotificationService) Create(ctx context.Context, req models.CreateNotif
 
 // NotifyAdmins saves an admin notification to DB + sends FCM push to all admins (non-blocking).
 // Always uses context.Background() so the operation is not tied to a request lifecycle.
-func (s *NotificationService) NotifyAdmins(ctx context.Context, title, body string) {
+func (s *NotificationService) NotifyAdmins(ctx context.Context, title, body, resourceType string, resourceID *uuid.UUID) {
 	bgCtx := context.Background()
+
+	var rid *uuid.UUID
+	if resourceID != nil {
+		copy := *resourceID
+		rid = &copy
+	}
+	var rt *string
+	if resourceType != "" {
+		copy := resourceType
+		rt = &copy
+	}
 
 	// Save to DB first (broadcast to all admins: driver_id = NULL, is_admin_notification = TRUE)
 	notification := &models.Notification{
@@ -57,6 +68,8 @@ func (s *NotificationService) NotifyAdmins(ctx context.Context, title, body stri
 		Body:                body,
 		DriverID:            nil,
 		IsAdminNotification: true,
+		ResourceType:        rt,
+		ResourceID:          rid,
 	}
 	if err := s.notificationRepo.Create(bgCtx, notification); err != nil {
 		log.Printf("Failed to save admin notification to DB: %v", err)
@@ -78,20 +91,39 @@ func (s *NotificationService) NotifyAdmins(ctx context.Context, title, body stri
 			"type":            "admin_alert",
 			"notification_id": notification.ID.String(),
 		}
+		if rt != nil {
+			data["resource_type"] = *rt
+		}
+		if rid != nil {
+			data["resource_id"] = rid.String()
+		}
 		_, _ = s.fcmService.SendToMultipleDevices(bgCtx, tokens, title, body, data)
 	}()
 }
 
 // NotifyDriver saves a notification for a specific driver and sends FCM push (non-blocking).
 // Uses context.Background() for DB/FCM so work is not cancelled when the HTTP request ends.
-func (s *NotificationService) NotifyDriver(_ context.Context, driverID uuid.UUID, title, body string) {
+func (s *NotificationService) NotifyDriver(_ context.Context, driverID uuid.UUID, title, body, resourceType string, resourceID *uuid.UUID) {
 	bgCtx := context.Background()
+
+	var rid *uuid.UUID
+	if resourceID != nil {
+		copy := *resourceID
+		rid = &copy
+	}
+	var rt *string
+	if resourceType != "" {
+		copy := resourceType
+		rt = &copy
+	}
 
 	notification := &models.Notification{
 		Title:               title,
 		Body:                body,
 		DriverID:            &driverID,
 		IsAdminNotification: false,
+		ResourceType:        rt,
+		ResourceID:          rid,
 	}
 	if err := s.notificationRepo.Create(bgCtx, notification); err != nil {
 		log.Printf("Failed to save driver notification to DB: %v", err)
@@ -111,6 +143,12 @@ func (s *NotificationService) NotifyDriver(_ context.Context, driverID uuid.UUID
 		data := map[string]string{
 			"type":            "notification",
 			"notification_id": notification.ID.String(),
+		}
+		if rt != nil {
+			data["resource_type"] = *rt
+		}
+		if rid != nil {
+			data["resource_id"] = rid.String()
 		}
 		_, _ = s.fcmService.SendToMultipleDevices(bgCtx, tokens, title, body, data)
 	}()
@@ -146,6 +184,12 @@ func (s *NotificationService) sendPushNotification(ctx context.Context, notifica
 	data := map[string]string{
 		"notification_id": notification.ID.String(),
 		"type":            "notification",
+	}
+	if notification.ResourceType != nil {
+		data["resource_type"] = *notification.ResourceType
+	}
+	if notification.ResourceID != nil {
+		data["resource_id"] = notification.ResourceID.String()
 	}
 
 	var tokens []string

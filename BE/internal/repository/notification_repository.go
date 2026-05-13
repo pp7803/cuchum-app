@@ -21,21 +21,23 @@ func NewNotificationRepository(pool *pgxpool.Pool) *NotificationRepository {
 // Create inserts a new notification (works for both driver and admin notifications)
 func (r *NotificationRepository) Create(ctx context.Context, notification *models.Notification) error {
 	query := `
-		INSERT INTO notifications (id, title, body, driver_id, is_admin_notification, created_by, created_at)
-		VALUES ($1, $2, $3, $4, $5, $6, $7)
+		INSERT INTO notifications (id, title, body, driver_id, is_admin_notification, created_by, resource_type, resource_id, created_at)
+		VALUES (\$1, \$2, \$3, \$4, \$5, \$6, \$7, \$8, \$9)
 	`
 	notification.ID = uuid.New()
 	notification.CreatedAt = time.Now()
 	notification.IsRead = false
 
 	_, err := r.pool.Exec(ctx, query,
-		notification.ID,
-		notification.Title,
-		notification.Body,
-		notification.DriverID,
-		notification.IsAdminNotification,
-		notification.CreatedBy,
-		notification.CreatedAt,
+			notification.ID,
+			notification.Title,
+			notification.Body,
+			notification.DriverID,
+			notification.IsAdminNotification,
+			notification.CreatedBy,
+			notification.ResourceType,
+			notification.ResourceID,
+			notification.CreatedAt,
 	)
 	return err
 }
@@ -43,7 +45,7 @@ func (r *NotificationRepository) Create(ctx context.Context, notification *model
 // ListForDriver returns notifications for a specific driver + broadcast (NULL driver_id) notifications
 func (r *NotificationRepository) ListForDriver(ctx context.Context, driverID uuid.UUID) ([]*models.Notification, error) {
 	query := `
-		SELECT id, title, body, driver_id, is_read, is_admin_notification, created_by, created_at
+		SELECT id, title, body, driver_id, is_read, is_admin_notification, created_by, resource_type, resource_id, created_at
 		FROM notifications
 		WHERE is_admin_notification = FALSE
 		  AND (driver_id = $1 OR driver_id IS NULL)
@@ -56,7 +58,7 @@ func (r *NotificationRepository) ListForDriver(ctx context.Context, driverID uui
 // ListForAdmin returns admin notifications (system alerts broadcast to all admins)
 func (r *NotificationRepository) ListForAdmin(ctx context.Context) ([]*models.Notification, error) {
 	query := `
-		SELECT id, title, body, driver_id, is_read, is_admin_notification, created_by, created_at
+		SELECT id, title, body, driver_id, is_read, is_admin_notification, created_by, resource_type, resource_id, created_at
 		FROM notifications
 		WHERE is_admin_notification = TRUE
 		ORDER BY created_at DESC
@@ -72,7 +74,7 @@ func (r *NotificationRepository) ListAll(ctx context.Context, driverID *uuid.UUI
 	}
 	// Admin calling without driver filter → return driver broadcasts
 	query := `
-		SELECT id, title, body, driver_id, is_read, is_admin_notification, created_by, created_at
+		SELECT id, title, body, driver_id, is_read, is_admin_notification, created_by, resource_type, resource_id, created_at
 		FROM notifications
 		WHERE is_admin_notification = FALSE
 		ORDER BY created_at DESC
@@ -129,7 +131,8 @@ func (r *NotificationRepository) scan(rows interface {
 		n := &models.Notification{}
 		if err := rows.Scan(
 			&n.ID, &n.Title, &n.Body, &n.DriverID,
-			&n.IsRead, &n.IsAdminNotification, &n.CreatedBy, &n.CreatedAt,
+			&n.IsRead, &n.IsAdminNotification, &n.CreatedBy,
+				&n.ResourceType, &n.ResourceID, &n.CreatedAt,
 		); err != nil {
 			return nil, fmt.Errorf("failed to scan notification: %w", err)
 		}

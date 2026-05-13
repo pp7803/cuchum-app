@@ -73,7 +73,7 @@ func (s *PayslipService) Create(ctx context.Context, req models.CreatePayslipReq
 		did := req.DriverID
 		go func() {
 			s.notif.NotifyDriver(context.Background(), did, "Bảng lương mới",
-				fmt.Sprintf("Kỳ lương %s đã được đăng tải. Mở ứng dụng để xem chi tiết.", monthStr))
+				fmt.Sprintf("Kỳ lương %s đã được đăng tải. Mở ứng dụng để xem chi tiết.", monthStr), "payslip", &payslip.ID)
 		}()
 	}
 
@@ -119,13 +119,13 @@ func (s *PayslipService) ConfirmPayslip(ctx context.Context, payslipID, driverID
 	switch req.Status {
 	case models.PayslipConfirmed:
 		go s.notif.NotifyAdmins(bg, "Xác nhận bảng lương",
-			fmt.Sprintf("%s đã xác nhận đúng bảng lương kỳ %s.", driverName, monthStr))
+			fmt.Sprintf("%s đã xác nhận đúng bảng lương kỳ %s.", driverName, monthStr), "payslip", &ps.ID)
 	case models.PayslipComplained:
 		body := fmt.Sprintf("%s khiếu nại bảng lương kỳ %s.", driverName, monthStr)
 		if notePreview != "" {
 			body += " Nội dung: " + notePreview
 		}
-		go s.notif.NotifyAdmins(bg, "Khiếu nại bảng lương", body)
+		go s.notif.NotifyAdmins(bg, "Khiếu nại bảng lương", body, "payslip", &ps.ID)
 	}
 
 	return nil
@@ -174,7 +174,7 @@ func (s *PayslipService) ImportFromData(ctx context.Context, items []models.Pays
 			sm := item.SalaryMonth
 			go func() {
 				s.notif.NotifyDriver(context.Background(), did, "Bảng lương mới",
-					fmt.Sprintf("Kỳ lương %s đã được đăng tải.", sm))
+					fmt.Sprintf("Kỳ lương %s đã được đăng tải.", sm), "payslip", &payslip.ID)
 			}()
 		}
 	}

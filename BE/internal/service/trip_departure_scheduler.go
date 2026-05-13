@@ -35,7 +35,7 @@ func (s *TripService) RunDepartureJobs(ctx context.Context) {
 					log.Printf("RunDepartureJobs: mark 10m %s: %v", t.ID, mErr)
 				} else if ok {
 					s.notif.NotifyDriver(ctx, t.DriverID, "🚛 Sắp tới giờ chạy",
-						fmt.Sprintf("Chuyến dự kiến bắt đầu lúc %s (còn khoảng 10 phút).", when))
+						fmt.Sprintf("Chuyến dự kiến bắt đầu lúc %s (còn khoảng 10 phút).", when), "trip", &t.ID)
 				}
 			}
 
@@ -46,7 +46,7 @@ func (s *TripService) RunDepartureJobs(ctx context.Context) {
 					log.Printf("RunDepartureJobs: mark start %s: %v", t.ID, mErr)
 				} else if ok {
 					s.notif.NotifyDriver(ctx, t.DriverID, "▶️ Đến giờ chạy dự kiến",
-						fmt.Sprintf("Giờ bắt đầu dự kiến %s. Hoàn tất kiểm tra xe (nếu chưa) và bắt đầu chạy.", when))
+						fmt.Sprintf("Giờ bắt đầu dự kiến %s. Hoàn tất kiểm tra xe (nếu chưa) và bắt đầu chạy.", when), "trip", &t.ID)
 				}
 			}
 
@@ -57,7 +57,7 @@ func (s *TripService) RunDepartureJobs(ctx context.Context) {
 					log.Printf("RunDepartureJobs: mark late %s: %v", t.ID, mErr)
 				} else if ok {
 					s.notif.NotifyDriver(ctx, t.DriverID, "⏰ Chuyến đang trễ",
-						fmt.Sprintf("Đã quá giờ dự kiến %s. Hãy bắt đầu chạy sớm — tối đa 30 phút sau giờ dự kiến, sau đó chuyến sẽ bị hủy tự động.", when))
+						fmt.Sprintf("Đã quá giờ dự kiến %s. Hãy bắt đầu chạy sớm — tối đa 30 phút sau giờ dự kiến, sau đó chuyến sẽ bị hủy tự động.", when), "trip", &t.ID)
 				}
 			}
 		}
@@ -70,6 +70,6 @@ func (s *TripService) RunDepartureJobs(ctx context.Context) {
 	}
 	for _, did := range driverIDs {
 		s.notif.NotifyDriver(ctx, did, "❌ Chuyến bị hủy tự động",
-			"Chuyến đã bị hủy vì không bắt đầu trong 30 phút kể từ giờ chạy dự kiến.")
+			"Chuyến đã bị hủy vì không bắt đầu trong 30 phút kể từ giờ chạy dự kiến.", "trip", nil)
 	}
 }

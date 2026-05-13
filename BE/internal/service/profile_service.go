@@ -142,7 +142,7 @@ func (s *ProfileService) RequestProfileUpdate(
 	}
 	s.notificationService.NotifyAdmins(ctx,
 		"📋 Yêu cầu cập nhật hồ sơ mới",
-		fmt.Sprintf("%s vừa gửi yêu cầu cập nhật thông tin hồ sơ.", driverName),
+		fmt.Sprintf("%s vừa gửi yêu cầu cập nhật thông tin hồ sơ.", driverName), "", nil,
 	)
 
 	return pur, nil

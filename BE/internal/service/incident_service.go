@@ -103,7 +103,7 @@ func (s *IncidentService) Create(ctx context.Context, driverID uuid.UUID, req mo
 			typeLabel = "vi phạm"
 		}
 		body := fmt.Sprintf("%s đã báo %s (xe %s).", driverName, typeLabel, plate)
-		s.notif.NotifyAdmins(context.Background(), title, body)
+		s.notif.NotifyAdmins(context.Background(), title, body, "incident", &incident.ID)
 	}
 
 	return incident, nil

@@ -263,17 +263,6 @@ class _PayslipsScreenState extends State<PayslipsScreen> {
                   color: Colors.white, fontWeight: FontWeight.w600),
             ),
           ),
-          bottomNavigationBar: _selectedDriver == null &&
-                  !_loadingDrivers &&
-                  _driverPagination.totalItems > 0
-              ? PaginationWidget(
-                  state: _driverPagination,
-                  isDark: isDark,
-                  onPageChanged: _onDriverPageChanged,
-                  onPageSizeChanged: _onDriverPageSizeChanged,
-                  pageSizeOptions: const [8, 12, 24],
-                )
-              : null,
           body: SafeArea(
             child: _selectedDriver == null
                 ? _buildAdminDriverList(lang, isDark, fg)
@@ -379,7 +368,7 @@ class _PayslipsScreenState extends State<PayslipsScreen> {
                       ),
                     )
                   : ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
                       itemCount: _pageDrivers.length,
                       separatorBuilder: (_, __) => const SizedBox(height: 10),
                       itemBuilder: (_, i) {
@@ -451,6 +440,17 @@ class _PayslipsScreenState extends State<PayslipsScreen> {
                       },
                     ),
         ),
+        if (!_loadingDrivers && _driverPagination.totalItems > 0)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 80),
+            child: PaginationWidget(
+              state: _driverPagination,
+              isDark: isDark,
+              onPageChanged: _onDriverPageChanged,
+              onPageSizeChanged: _onDriverPageSizeChanged,
+              pageSizeOptions: const [8, 12, 24],
+            ),
+          ),
       ],
     );
   }
@@ -532,7 +532,7 @@ class _PayslipsScreenState extends State<PayslipsScreen> {
       );
     }
     return ListView.separated(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+      padding: EdgeInsets.fromLTRB(20, 0, 20, _isAdmin ? 100 : 12),
       itemCount: _pagePayslips.length,
       separatorBuilder: (_, __) => const SizedBox(height: 10),
       itemBuilder: (_, i) {

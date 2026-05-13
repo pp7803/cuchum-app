@@ -11,7 +11,7 @@ import FirebaseMessaging
   ) -> Bool {
     // Configure Firebase
     FirebaseApp.configure()
-    
+
     // Request notification permissions
     if #available(iOS 10.0, *) {
       UNUserNotificationCenter.current().delegate = self

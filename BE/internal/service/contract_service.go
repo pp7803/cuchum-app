@@ -73,7 +73,7 @@ func (s *ContractService) Create(ctx context.Context, req models.CreateContractR
 		num := req.ContractNumber
 		go func() {
 			s.notif.NotifyDriver(context.Background(), did, "Hợp đồng lao động",
-				fmt.Sprintf("Hợp đồng %s đã được thêm. Vui lòng xem PDF và xác nhận hoặc từ chối kèm lý do trên ứng dụng.", num))
+				fmt.Sprintf("Hợp đồng %s đã được thêm. Vui lòng xem PDF và xác nhận hoặc từ chối kèm lý do trên ứng dụng.", num), "contract", &contract.ID)
 		}()
 	}
 
@@ -138,14 +138,14 @@ func (s *ContractService) RespondContract(ctx context.Context, contractID, drive
 	switch req.Status {
 	case models.ContractAckAcknowledged:
 		go s.notif.NotifyAdmins(bg, "Tài xế xác nhận hợp đồng",
-			fmt.Sprintf("%s đã xác nhận đã đọc và đồng ý hợp đồng %s.", driverName, num))
+			fmt.Sprintf("%s đã xác nhận đã đọc và đồng ý hợp đồng %s.", driverName, num), "contract", &c.ID)
 	case models.ContractAckDeclined:
 		reason := ""
 		if notePtr != nil {
 			reason = *notePtr
 		}
 		go s.notif.NotifyAdmins(bg, "Tài xế không xác nhận hợp đồng",
-			fmt.Sprintf("%s không xác nhận hợp đồng %s. Lý do: %s", driverName, num, reason))
+			fmt.Sprintf("%s không xác nhận hợp đồng %s. Lý do: %s", driverName, num, reason), "contract", &c.ID)
 	}
 
 	return nil

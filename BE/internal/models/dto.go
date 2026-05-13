@@ -25,6 +25,12 @@ type RefreshTokenRequest struct {
 	RefreshToken string `json:"refresh_token" form:"refresh_token" binding:"required"`
 }
 
+// LogoutRequest represents logout request with optional FCM token
+type LogoutRequest struct {
+	RefreshToken string  `json:"refresh_token" form:"refresh_token" binding:"required"`
+	FCMToken     *string `json:"fcm_token" form:"fcm_token"`
+}
+
 // RefreshTokenResponse represents refresh token response
 type RefreshTokenResponse struct {
 	AccessToken  string `json:"access_token"`

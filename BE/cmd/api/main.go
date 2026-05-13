@@ -125,8 +125,7 @@ func main() {
 		{
 			prices.GET("", fuelPriceHandler.GetCombinedPrices)
 			prices.GET("/petrolimex", fuelPriceHandler.GetPetrolimexPrices)
-			prices.GET("/pvoil", fuelPriceHandler.GetPVOilPrices)
-		}
+					}
 
 		auth := v1.Group("/auth")
 		{

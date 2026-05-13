@@ -30,17 +30,14 @@ class TripMapCard extends StatelessWidget {
   List<_TripPoint> _tripPoints() {
     final points = <_TripPoint>[];
     if (_isValidPoint(trip.startLat, trip.startLng)) {
-      points.add(
-        _TripPoint(
-          point: LatLng(trip.startLat!, trip.startLng!),
-          isStart: true,
-        ),
-      );
+      points.add(_TripPoint(
+        point: LatLng(trip.startLat!, trip.startLng!),
+        isStart: true,
+      ));
     }
     if (_isValidPoint(trip.endLat, trip.endLng)) {
-      points.add(
-        _TripPoint(point: LatLng(trip.endLat!, trip.endLng!), isStart: false),
-      );
+      points.add(_TripPoint(
+          point: LatLng(trip.endLat!, trip.endLng!), isStart: false));
     }
     return points;
   }
@@ -49,19 +46,20 @@ class TripMapCard extends StatelessWidget {
     if (points.length == 1) return points.first.point;
     final lat =
         points.map((p) => p.point.latitude).reduce((a, b) => a + b) /
-        points.length;
+            points.length;
     final lng =
         points.map((p) => p.point.longitude).reduce((a, b) => a + b) /
-        points.length;
+            points.length;
     return LatLng(lat, lng);
   }
 
   double _initialZoom(List<_TripPoint> points) {
     if (points.length <= 1) return 15;
-    final dLat = (points[0].point.latitude - points[1].point.latitude).abs();
-    final dLng = (points[0].point.longitude - points[1].point.longitude).abs();
+    final dLat =
+        (points[0].point.latitude - points[1].point.latitude).abs();
+    final dLng =
+        (points[0].point.longitude - points[1].point.longitude).abs();
     final delta = dLat > dLng ? dLat : dLng;
-
     if (delta < 0.02) return 13.8;
     if (delta < 0.08) return 12.8;
     if (delta < 0.2) return 11.8;
@@ -136,7 +134,9 @@ class TripMapCard extends StatelessWidget {
                               PolylineLayer(
                                 polylines: [
                                   Polyline(
-                                    points: points.map((e) => e.point).toList(),
+                                    points: points
+                                        .map((e) => e.point)
+                                        .toList(),
                                     strokeWidth: 4,
                                     color: AppColors.primary.withValues(
                                       alpha: 0.85,
@@ -151,7 +151,8 @@ class TripMapCard extends StatelessWidget {
                                       point: p.point,
                                       width: 36,
                                       height: 36,
-                                      child: _TripMapMarker(isStart: p.isStart),
+                                      child:
+                                          _TripMapMarker(isStart: p.isStart),
                                     ),
                                   )
                                   .toList(),
@@ -222,6 +223,13 @@ class TripMapCard extends StatelessWidget {
   }
 }
 
+class _TripPoint {
+  const _TripPoint({required this.point, required this.isStart});
+
+  final LatLng point;
+  final bool isStart;
+}
+
 class _TripMapMarker extends StatelessWidget {
   const _TripMapMarker({required this.isStart});
 
@@ -247,11 +255,4 @@ class _TripMapMarker extends StatelessWidget {
       child: Icon(icon, size: 18, color: Colors.white),
     );
   }
-}
-
-class _TripPoint {
-  const _TripPoint({required this.point, required this.isStart});
-
-  final LatLng point;
-  final bool isStart;
 }

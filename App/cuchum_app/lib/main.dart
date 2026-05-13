@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 import 'core/constants/api_constants.dart';
@@ -8,10 +9,15 @@ import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
 import 'core/trans/language_provider.dart';
 import 'core/services/api_service.dart';
+import 'core/services/api_models.dart';
 import 'core/services/auth_service.dart';
 import 'core/services/user_service.dart';
 import 'core/services/fcm_service.dart';
+import 'core/utils/notification_navigation.dart';
 import 'features/auth/screens/login_screen.dart';
+
+/// Global navigator key for FCM to push screens from background/terminated state.
+final GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -78,7 +84,41 @@ class _MyAppState extends State<MyApp> {
         debugPrint(
           'App opened from notification: ${message.notification?.title}',
         );
+        _handleExternalNotification(message);
       },
+    );
+
+    _fcmService.onNotificationTapNavigation = _handleNotificationData;
+  }
+
+  void _handleExternalNotification(RemoteMessage message) {
+    _handleNotificationData(message.data);
+  }
+
+  void _handleNotificationData(Map<String, dynamic> data) {
+    final isAdmin = Provider.of<AuthService>(context, listen: false)
+            .currentUser
+            ?.isAdmin ??
+        false;
+    Future.delayed(const Duration(milliseconds: 500), () {
+      final n = _notificationFromPayload(data);
+      NotificationNavigation.navigateWithKey(appNavigatorKey, n, isAdmin: isAdmin);
+    });
+  }
+
+  NotificationData _notificationFromPayload(Map<String, dynamic> data) {
+    final rt = data['resource_type'] as String?;
+    String? rid;
+    if (data['resource_id'] != null) {
+      rid = data['resource_id'].toString();
+    }
+    return NotificationData(
+      id: (data['notification_id'] ?? '').toString(),
+      title: '',
+      body: '',
+      isRead: false,
+      resourceType: rt,
+      resourceId: rid,
     );
   }
 
@@ -118,6 +158,7 @@ class _MyAppState extends State<MyApp> {
     final languageProvider = Provider.of<LanguageProvider>(context);
 
     return MaterialApp(
+      navigatorKey: appNavigatorKey,
       title: 'CucHum',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
