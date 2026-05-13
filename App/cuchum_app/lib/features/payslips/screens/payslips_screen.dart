@@ -252,17 +252,7 @@ class _PayslipsScreenState extends State<PayslipsScreen> {
       return DismissKeyboard(
         child: Scaffold(
           backgroundColor: bg,
-          floatingActionButton: FloatingActionButton.extended(
-            onPressed: () => _showCreateSheet(lang, isDark,
-                preselectedDriver: _selectedDriver),
-            backgroundColor: AppColors.primary,
-            icon: const Icon(Icons.add_rounded, color: Colors.white),
-            label: Text(
-              PayslipsLanguage.get('create', lang),
-              style: const TextStyle(
-                  color: Colors.white, fontWeight: FontWeight.w600),
-            ),
-          ),
+          bottomNavigationBar: _bottomBar(isDark),
           body: SafeArea(
             child: _selectedDriver == null
                 ? _buildAdminDriverList(lang, isDark, fg)
@@ -275,6 +265,15 @@ class _PayslipsScreenState extends State<PayslipsScreen> {
     return DismissKeyboard(
       child: Scaffold(
         backgroundColor: bg,
+        bottomNavigationBar: (!_loading && _payslipPagination.totalItems > 0)
+            ? PaginationWidget(
+                state: _payslipPagination,
+                isDark: isDark,
+                onPageChanged: _onPayslipPageChanged,
+                onPageSizeChanged: _onPayslipPageSizeChanged,
+                pageSizeOptions: const [5, 10, 20],
+              )
+            : null,
         body: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -287,49 +286,81 @@ class _PayslipsScreenState extends State<PayslipsScreen> {
                 isDark: isDark,
               ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
-                child: Row(
-                  children: [
-                    Text(
-                      '${PayslipsLanguage.get('month_filter', lang)}: ',
-                      style: TextStyle(fontSize: 14, color: fg),
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 14),
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColors.darkSurface : Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: isDark ? Colors.white12 : Colors.grey.shade200,
                     ),
-                    Expanded(
-                      child: DropdownButtonFormField<String?>(
-                        value: _monthKey,
-                        isExpanded: true,
-                        decoration: InputDecoration(
-                          filled: true,
-                          fillColor:
-                              isDark ? AppColors.darkSurface : Colors.white,
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12)),
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 12, vertical: 8),
-                        ),
-                        items: _monthItems(lang),
-                        onChanged: (v) {
-                          setState(() => _monthKey = v);
-                          _loadPayslips();
-                        },
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.calendar_month_rounded,
+                          size: 18, color: AppColors.primary),
+                      const SizedBox(width: 10),
+                      Text(
+                        PayslipsLanguage.get('month_filter', lang),
+                        style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: fg),
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: DropdownButtonFormField<String?>(
+                          value: _monthKey,
+                          isExpanded: true,
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            contentPadding:
+                                EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+                          ),
+                          style: TextStyle(fontSize: 14, color: fg),
+                          dropdownColor:
+                              isDark ? AppColors.darkSurface : Colors.white,
+                          items: _monthItems(lang),
+                          onChanged: (v) {
+                            setState(() => _monthKey = v);
+                            _loadPayslips();
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               Expanded(child: _buildDriverPayslipBody(lang, isDark, fg)),
-              if (!_loading && _payslipPagination.totalItems > 0)
-                PaginationWidget(
-                  state: _payslipPagination,
-                  isDark: isDark,
-                  onPageChanged: _onPayslipPageChanged,
-                  onPageSizeChanged: _onPayslipPageSizeChanged,
-                  pageSizeOptions: const [5, 10, 20],
-                ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget? _bottomBar(bool isDark) {
+    // Admin: driver list
+    if (_selectedDriver == null) {
+      if (_loadingDrivers || _driverPagination.totalItems <= 0) return null;
+      return PaginationWidget(
+        state: _driverPagination,
+        isDark: isDark,
+        onPageChanged: _onDriverPageChanged,
+        onPageSizeChanged: _onDriverPageSizeChanged,
+        pageSizeOptions: const [8, 12, 24],
+      );
+    }
+    // Admin: per-driver payslips
+    if (_loading || _payslipPagination.totalItems <= 0) return null;
+    return PaginationWidget(
+      state: _payslipPagination,
+      isDark: isDark,
+      onPageChanged: _onPayslipPageChanged,
+      onPageSizeChanged: _onPayslipPageSizeChanged,
+      pageSizeOptions: const [5, 10, 20],
     );
   }
 
@@ -368,7 +399,7 @@ class _PayslipsScreenState extends State<PayslipsScreen> {
                       ),
                     )
                   : ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
                       itemCount: _pageDrivers.length,
                       separatorBuilder: (_, __) => const SizedBox(height: 10),
                       itemBuilder: (_, i) {
@@ -440,17 +471,6 @@ class _PayslipsScreenState extends State<PayslipsScreen> {
                       },
                     ),
         ),
-        if (!_loadingDrivers && _driverPagination.totalItems > 0)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 80),
-            child: PaginationWidget(
-              state: _driverPagination,
-              isDark: isDark,
-              onPageChanged: _onDriverPageChanged,
-              onPageSizeChanged: _onDriverPageSizeChanged,
-              pageSizeOptions: const [8, 12, 24],
-            ),
-          ),
       ],
     );
   }
@@ -475,44 +495,75 @@ class _PayslipsScreenState extends State<PayslipsScreen> {
           isDark: isDark,
         ),
         Padding(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
-          child: Row(
-            children: [
-              Text(
-                '${PayslipsLanguage.get('month_filter', lang)}: ',
-                style: TextStyle(fontSize: 14, color: fg),
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 14),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.darkSurface : Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: isDark ? Colors.white12 : Colors.grey.shade200,
               ),
-              Expanded(
-                child: DropdownButtonFormField<String?>(
-                  value: _monthKey,
-                  isExpanded: true,
-                  decoration: InputDecoration(
-                    filled: true,
-                    fillColor: isDark ? AppColors.darkSurface : Colors.white,
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12)),
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12, vertical: 8),
-                  ),
-                  items: _monthItems(lang),
-                  onChanged: (v) {
-                    setState(() => _monthKey = v);
-                    _loadPayslips();
-                  },
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.calendar_month_rounded,
+                    size: 18, color: AppColors.primary),
+                const SizedBox(width: 10),
+                Text(
+                  PayslipsLanguage.get('month_filter', lang),
+                  style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: fg),
                 ),
-              ),
-            ],
+                const SizedBox(width: 8),
+                Expanded(
+                  child: DropdownButtonFormField<String?>(
+                    value: _monthKey,
+                    isExpanded: true,
+                    decoration: const InputDecoration(
+                      border: InputBorder.none,
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+                    ),
+                    style: TextStyle(fontSize: 14, color: fg),
+                    dropdownColor: isDark ? AppColors.darkSurface : Colors.white,
+                    items: _monthItems(lang),
+                    onChanged: (v) {
+                      setState(() => _monthKey = v);
+                      _loadPayslips();
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         Expanded(child: _buildDriverPayslipBody(lang, isDark, fg)),
-        if (!_loading && _payslipPagination.totalItems > 0)
-          PaginationWidget(
-            state: _payslipPagination,
-            isDark: isDark,
-            onPageChanged: _onPayslipPageChanged,
-            onPageSizeChanged: _onPayslipPageSizeChanged,
-            pageSizeOptions: const [5, 10, 20],
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
+          child: SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              style: FilledButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+              onPressed: () => _showCreateSheet(lang, isDark,
+                  preselectedDriver: _selectedDriver),
+              icon: const Icon(Icons.add_rounded, color: Colors.white),
+              label: Text(
+                PayslipsLanguage.get('create', lang),
+                style: const TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.w600),
+              ),
+            ),
           ),
+        ),
       ],
     );
   }
@@ -532,7 +583,7 @@ class _PayslipsScreenState extends State<PayslipsScreen> {
       );
     }
     return ListView.separated(
-      padding: EdgeInsets.fromLTRB(20, 0, 20, _isAdmin ? 100 : 12),
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
       itemCount: _pagePayslips.length,
       separatorBuilder: (_, __) => const SizedBox(height: 10),
       itemBuilder: (_, i) {
@@ -559,6 +610,19 @@ class _PayslipsScreenState extends State<PayslipsScreen> {
   }
 }
 
+Color _payslipStatusColor(String status) {
+  switch (status.toUpperCase()) {
+    case 'CONFIRMED':
+      return AppColors.success;
+    case 'COMPLAINED':
+      return AppColors.error;
+    case 'VIEWED':
+      return AppColors.info;
+    default:
+      return AppColors.warning; // PENDING
+  }
+}
+
 class _PayslipCard extends StatelessWidget {
   const _PayslipCard({
     required this.payslip,
@@ -577,7 +641,6 @@ class _PayslipCard extends StatelessWidget {
   final bool isDark;
   final AppLanguage lang;
   final bool isAdmin;
-  /// Ẩn dòng tài xế khi admin đang lọc theo một tài xế.
   final bool showDriverLine;
   final String monthLabel;
   final String statusLabel;
@@ -589,90 +652,197 @@ class _PayslipCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cardBg = isDark ? AppColors.darkSurface : Colors.white;
     final fg = isDark ? AppColors.darkText : AppColors.lightText;
+    final muted = fg.withValues(alpha: 0.65);
+    final accent = _payslipStatusColor(payslip.status);
+
     return Container(
-      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isDark ? Colors.white10 : Colors.grey.shade100,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.06),
-            blurRadius: 10,
-            offset: const Offset(0, 3),
+            color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.payments_outlined, color: AppColors.primary, size: 22),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  monthLabel,
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: fg),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  statusLabel,
-                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primary),
-                ),
-              ),
-            ],
-          ),
-          if (isAdmin && showDriverLine) ...[
-            const SizedBox(height: 6),
-            Text(
-              '${PayslipsLanguage.get('driver_short', lang)}: ${payslip.driverDisplayLabel}',
-              style: TextStyle(fontSize: 12, color: fg.withValues(alpha: 0.75)),
-            ),
-          ],
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: onPdf,
-                  icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
-                  label: Text(PayslipsLanguage.get('view_pdf', lang)),
-                ),
-              ),
-            ],
-          ),
-          if (onConfirm != null || onComplain != null) ...[
-            const SizedBox(height: 8),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Header row: icon, month, status badge ──────────────
             Row(
               children: [
-                if (onConfirm != null)
-                  Expanded(
-                    child: TextButton(
-                      onPressed: onConfirm,
-                      child: Text(PayslipsLanguage.get('confirm', lang)),
-                    ),
+                Container(
+                  width: 42,
+                  height: 42,
+                  decoration: BoxDecoration(
+                    color: accent.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                if (onComplain != null)
-                  Expanded(
-                    child: TextButton(
-                      onPressed: onComplain,
-                      child: Text(
-                        PayslipsLanguage.get('complain', lang),
-                        style: const TextStyle(color: AppColors.error),
+                  child: Icon(Icons.receipt_long_rounded,
+                      color: accent, size: 22),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Kỳ lương $monthLabel',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: fg,
+                        ),
                       ),
+                      if (isAdmin && showDriverLine) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          payslip.driverDisplayLabel,
+                          style: TextStyle(fontSize: 12, color: muted),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: accent.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Text(
+                    statusLabel,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: accent,
                     ),
                   ),
+                ),
               ],
             ),
+            const SizedBox(height: 12),
+            // ── Divider ─────────────────────────────────────────
+            Divider(
+                height: 1,
+                color: isDark ? Colors.white10 : Colors.grey.shade100),
+            const SizedBox(height: 12),
+            // ── Info row ────────────────────────────────────────
+            Row(
+              children: [
+                _infoChip(
+                    payslip.isViewed
+                        ? Icons.visibility_rounded
+                        : Icons.visibility_off_outlined,
+                    payslip.isViewed
+                        ? PayslipsLanguage.get('status_viewed', lang)
+                        : (lang == AppLanguage.vi ? 'Chưa xem' : 'Unviewed'),
+                    payslip.isViewed ? AppColors.success : muted,
+                    isDark),
+                if (payslip.note != null && payslip.note!.isNotEmpty) ...[
+                  const SizedBox(width: 16),
+                  Flexible(
+                    child: _infoChip(Icons.chat_bubble_outline, payslip.note!,
+                        AppColors.warning, isDark),
+                  ),
+                ],
+              ],
+            ),
+            const SizedBox(height: 14),
+            // ── Action buttons ──────────────────────────────────
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: onPdf,
+                    icon: const Icon(Icons.picture_as_pdf_outlined, size: 18),
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10)),
+                    ),
+                    label: Text(PayslipsLanguage.get('view_pdf', lang)),
+                  ),
+                ),
+              ],
+            ),
+            if (onConfirm != null || onComplain != null) ...[
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  if (onConfirm != null)
+                    Expanded(
+                      child: FilledButton(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: AppColors.success,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                        ),
+                        onPressed: onConfirm,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.check_rounded, size: 17),
+                            const SizedBox(width: 6),
+                            Text(PayslipsLanguage.get('confirm', lang)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  if (onConfirm != null && onComplain != null)
+                    const SizedBox(width: 10),
+                  if (onComplain != null)
+                    Expanded(
+                      child: OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: AppColors.error,
+                          side: const BorderSide(color: AppColors.error),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                        ),
+                        onPressed: onComplain,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.report_outlined, size: 17),
+                            const SizedBox(width: 6),
+                            Text(PayslipsLanguage.get('complain', lang)),
+                          ],
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ],
           ],
-        ],
+        ),
       ),
+    );
+  }
+
+  Widget _infoChip(
+      IconData icon, String text, Color color, bool isDark) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 14, color: color),
+        const SizedBox(width: 4),
+        Text(
+          text,
+          style: TextStyle(fontSize: 11, color: color),
+        ),
+      ],
     );
   }
 }

@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/google/uuid"
@@ -140,6 +141,7 @@ func (s *ProfileService) RequestProfileUpdate(
 	if user != nil {
 		driverName = user.FullName
 	}
+		log.Printf("[PROFILE] Triggering NotifyAdmins for profile update from user=%s", userID)
 	s.notificationService.NotifyAdmins(ctx,
 		"📋 Yêu cầu cập nhật hồ sơ mới",
 		fmt.Sprintf("%s vừa gửi yêu cầu cập nhật thông tin hồ sơ.", driverName), "", nil,

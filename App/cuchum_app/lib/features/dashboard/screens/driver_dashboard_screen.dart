@@ -486,13 +486,6 @@ class _DriverDashboardScreenState extends State<DriverDashboardScreen> {
         ),
       ),
       _QuickAction(
-        icon: Icons.warning_amber_rounded,
-        label: DashboardLanguage.get('report_incident', lang),
-        gradient: const [Color(0xFFDC2626), Color(0xFFEF4444)],
-        shadow: AppColors.error,
-        onTap: () {},
-      ),
-      _QuickAction(
         icon: Icons.local_gas_station_rounded,
         label: DashboardLanguage.get('fuel_cost', lang),
         gradient: const [Color(0xFF7C3AED), Color(0xFF9F67FF)],

@@ -200,15 +200,7 @@ class _MainShellState extends State<MainShell> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: GestureDetector(
-        onTap: () {
-          // TODO: implement camera feature
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Tính năng Camera sẽ sớm được ra mắt'),
-              duration: Duration(seconds: 2),
-            ),
-          );
-        },
+        onTap: null,
         child: Container(
           width: 56,
           height: 56,
@@ -227,10 +219,10 @@ class _MainShellState extends State<MainShell> {
               ),
             ],
           ),
-          child: const Icon(
-            Icons.camera_alt_rounded,
-            color: Colors.white,
-            size: 26,
+          child: Image.asset(
+            'lib/assets/images/logo.png',
+            width: 30,
+            height: 30,
           ),
         ),
       ),

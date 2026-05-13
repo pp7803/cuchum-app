@@ -22,7 +22,7 @@ func NewNotificationRepository(pool *pgxpool.Pool) *NotificationRepository {
 func (r *NotificationRepository) Create(ctx context.Context, notification *models.Notification) error {
 	query := `
 		INSERT INTO notifications (id, title, body, driver_id, is_admin_notification, created_by, resource_type, resource_id, created_at)
-		VALUES (\$1, \$2, \$3, \$4, \$5, \$6, \$7, \$8, \$9)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 	`
 	notification.ID = uuid.New()
 	notification.CreatedAt = time.Now()
